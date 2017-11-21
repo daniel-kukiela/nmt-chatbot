@@ -1,6 +1,6 @@
 #quick file to pair epoch outputs w/ original test file 
 
-output_file_location = 'output_dev-30000'
+output_file_location = 'output_dev'
 tst_file_location = 'tst2013.from'
 
 if __name__ == '__main__':
