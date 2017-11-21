@@ -1,7 +1,7 @@
 import sys
 import os
 import argparse
-from settings import hparams
+from setup.settings import hparams
 sys.path.append("./nmt")
 from nmt import nmt
 import tensorflow as tf
