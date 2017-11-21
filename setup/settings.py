@@ -1,7 +1,7 @@
 import os
 
 # root package path (leave as is, or type full path)
-package_path = os.path.dirname(os.path.realpath(__file__))
+package_path = os.path.realpath(os.path.dirname(__file__) + '/..')
 
 # model path
 out_dir = os.path.join(package_path, "model")
