@@ -1,12 +1,16 @@
+import os
+
+# root package path (leave as is, or type full path)
+package_path = os.path.dirname(os.path.realpath(__file__))
 
 # model path
-out_dir = 'd:/seq2seq_test/model'
+out_dir = os.path.join(package_path, "model")
 
 # training data path
-train_dir = 'd:/seq2seq_test2/data'
+train_dir = os.path.join(package_path, "data")
 
 # raw data path (data to be prepared and tokenized)
-source_dir = 'd:/seq2seq_test2/new_data'
+source_dir = os.path.join(package_path, "new_data")
 
 # preprocessing settings
 preprocessing = {
@@ -39,16 +43,16 @@ hparams = {
     'attention': 'scaled_luong',
     'src': 'from',
     'tgt': 'to',
-    'vocab_prefix': train_dir + '/vocab',
-    'train_prefix': train_dir + '/train',
-    'dev_prefix': train_dir + '/tst2012',
-    'test_prefix': train_dir + '/tst2013',
+    'vocab_prefix': os.path.join(train_dir, "vocab"),
+    'train_prefix': os.path.join(train_dir, "train"),
+    'dev_prefix': os.path.join(train_dir, "tst2012"),
+    'test_prefix': os.path.join(train_dir, "tst2013"),
     'out_dir': out_dir,
     'num_train_steps': 500000,
-    'num_layers': 3,
-    'num_units': 256,
+    'num_layers': 5,
+    'num_units': 1024,
 #    'override_loaded_hparams': True,
-    'decay_factor': 0.99995,
+    'decay_factor': 0.99998,
     'decay_steps': 1,
 #    'residual': True,
     'start_decay_step': 1,
