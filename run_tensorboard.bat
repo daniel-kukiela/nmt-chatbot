@@ -1,0 +1,1 @@
+tensorboard --port 22222 --logdir d:\seq2seq_test\model\
