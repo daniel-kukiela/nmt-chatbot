@@ -5,7 +5,7 @@ from setup.settings import hparams, out_dir
 sys.path.append("./nmt")
 from nmt import nmt
 import tensorflow as tf
-from prepare_data import tokenize
+from core.tokenizer import tokenize
 
 
 # That will not be as easy as training script, as code relies on input and output file in deep levels of code
