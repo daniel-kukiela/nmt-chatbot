@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     # QAs
     while True:
-        question = input("> ")
+        question = input("\n> ")
         answers = inference(tokenize(question), *vars)
         print("- " + ("\n- ".join(answers)))
 
