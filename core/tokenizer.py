@@ -4,6 +4,7 @@ import html
 import re
 from setup.settings import preprocessing
 
+
 # inspired by https://github.com/moses-smt/mosesdecoder/blob/master/scripts/tokenizer/tokenizer.perl used in nmt's examples
 
 # List of prefixes that doesnt break period after them
@@ -33,7 +34,7 @@ nonbreaking_prefixes = {
 
 # Load list of protected words/phrases (those will not be breaked)
 protected_phrases = []
-with open(preprocessing['protected_phrases_file'], 'r', encoding='utf-8') as protected_file:
+with open(preprocessing['../setup/protected_phrases_file'], 'r', encoding='utf-8') as protected_file:
     protected_phrases = list(filter(None, protected_file.read().split("\n")))
 
 
