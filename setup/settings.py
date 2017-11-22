@@ -19,7 +19,7 @@ preprocessing = {
     'samples': -1,
 
     # vocab max size
-    'vocab_size': 18000,
+    'vocab_size': 100000,
 
     # test sets' max size
     'test_size': 100,
