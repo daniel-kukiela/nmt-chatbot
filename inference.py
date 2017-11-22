@@ -1,16 +1,19 @@
 import sys
 import os
+sys.path.append(os.path.realpath(os.path.dirname(__file__)))
+sys.path.append(os.path.realpath(os.path.dirname(__file__)) + "/nmt")
 import argparse
 from setup.settings import hparams, out_dir
-sys.path.append("./nmt")
 from nmt import nmt
 import tensorflow as tf
 from core.tokenizer import tokenize
 
 
+current_stdout = None
+
 # That will not be as easy as training script, as code relies on input and output file in deep levels of code
 # It also outputs massive amount of info
-# We have to make own script for inference, so we could:
+# We have to make own script for inference, so we could:cd ..
 # - use it in interactive mode
 # - import for use in other code
 # - use input and output of our choice (so, for example, file as input and console as output,
@@ -18,7 +21,13 @@ from core.tokenizer import tokenize
 # Why that nmt module doesn't give us some easy to use interface?
 
 # Start inference "engine"
-def start_inference(out_dir, hparams):
+def do_start_inference(out_dir, hparams):
+
+    # Silence all outputs
+    #os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+    global current_stdout
+    current_stdout = sys.stdout
+    sys.stdout = open(os.devnull, "w")
 
     # Modified autorun from nmt.py (bottom of the file)
     # We want to use original argument parser (for validation, etc)
@@ -61,7 +70,7 @@ def start_inference(out_dir, hparams):
     return (infer_model, flags, hparams)
 
 # Inference
-def inference(phrase, infer_model, flags, hparams):
+def do_inference(phrase, infer_model, flags, hparams):
 
     infer_data = [phrase]
 
@@ -70,8 +79,10 @@ def inference(phrase, infer_model, flags, hparams):
     # Already fixed, available in nightly builds, but not in stable version
     # Maybe that will stay here to silence any outputs
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-    current_stdout = sys.stdout
-    sys.stdout = open(os.devnull, "w")
+    global current_stdout
+    if not current_stdout:
+        current_stdout = sys.stdout
+        sys.stdout = open(os.devnull, "w")
 
     # Spawn new session
     with tf.Session(graph=infer_model.graph, config=nmt.utils.get_config_proto()) as sess:
@@ -127,19 +138,42 @@ def inference(phrase, infer_model, flags, hparams):
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
         sys.stdout.close()
         sys.stdout = current_stdout
+        current_stdout = None
 
         return translations
+
+# Fancy way to start everything on first inference() call
+def start_inference(question):
+
+    global inference_helper, inference_object
+
+    # Start inference, set global tuple with model, flags and hparams
+    inference_object = do_start_inference(out_dir, hparams)
+
+    # First inference() call calls that method
+    # Now we have everything running, so replace inference() with actual function call
+    inference_helper = lambda question: do_inference(tokenize(question), *inference_object)
+
+    # Rerun inference() call
+    return inference(question)
+
+# Model, flags and hparams
+inference_object = None
+
+# Function call helper (calls start_inference on first call, then do_inference)
+inference_helper = start_inference
+
+# Main inference function
+def inference(question):
+    return inference_helper(question)
 
 # interactive mode
 if __name__ == "__main__":
 
-    # start
-    vars = start_inference(out_dir, hparams)
-    print("\n\nStarting interactive mode:")
+    print("\n\nStarting interactive mode (first response will take a while):")
 
     # QAs
     while True:
         question = input("\n> ")
-        answers = inference(tokenize(question), *vars)
+        answers = inference(question)
         print("- " + ("\n- ".join(answers)))
-

@@ -1,5 +1,3 @@
-import sys
-sys.path.insert(0, '../')
 import html
 import re
 from setup.settings import preprocessing
