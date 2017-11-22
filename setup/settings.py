@@ -34,7 +34,7 @@ preprocessing = {
     'train_folder': train_dir,
 
     # file with protected phrases
-    'protected_phrases_file': 'protected_phrases.txt',
+    'protected_phrases_file': os.path.join(package_path, 'setup/protected_phrases.txt'),
 
 }
 
