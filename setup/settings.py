@@ -37,7 +37,7 @@ preprocessing = {
     'protected_phrases_file': os.path.join(package_path, 'setup/protected_phrases.txt'),
 
     # file with blacklisted answers
-    'responses_blacklist_file': os.path.join(package_path, 'setup/answers_blacklist.txt'),
+    'answers_blacklist_file': os.path.join(package_path, 'setup/answers_blacklist.txt'),
 
     # file with detokenizer rules
     'answers_detokenize_file': os.path.join(package_path, 'setup/answers_detokenize.txt'),
