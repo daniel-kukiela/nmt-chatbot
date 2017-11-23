@@ -7,7 +7,7 @@ from setup.settings import hparams, out_dir
 from nmt import nmt
 import tensorflow as tf
 from core.tokenizer import tokenize
-from core.phrase import score_answers
+from core.sentence import score_answers
 import colorama
 
 

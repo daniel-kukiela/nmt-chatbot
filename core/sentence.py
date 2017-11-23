@@ -2,8 +2,12 @@ import re
 from setup.settings import preprocessing
 
 
-# Joined regex of blacklisted phrases in answers
+# List with regex-based blacklisted phrases in answers
 answers_blacklist = None
+
+# Load blacklisted answers
+with open(preprocessing['answers_blacklist_file'], 'r', encoding='utf-8') as answers_blacklist_file:
+    answers_blacklist = list(filter(lambda word: False if word[0] == '#' else True, filter(None, answers_blacklist_file.read().split("\n"))))
 
 # Returns index of best answer, 0 if not found
 def score_answers(answers):
@@ -21,6 +25,3 @@ def score_answers(answers):
 
     return answers_rate
 
-# Load blacklisted answers
-with open(preprocessing['responses_blacklist_file'], 'r', encoding='utf-8') as answers_blacklist_file:
-    answers_blacklist = list(filter(lambda word: False if word[0] == '#' else True, filter(None, answers_blacklist_file.read().split("\n"))))

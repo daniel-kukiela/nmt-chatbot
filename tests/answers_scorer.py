@@ -1,6 +1,6 @@
 import sys
 sys.path.insert(0, '../')
-from core.phrase import score_answers
+from core.sentence import score_answers
 from colorama import Fore, init
 
 
