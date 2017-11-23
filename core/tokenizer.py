@@ -6,9 +6,6 @@ from setup.settings import preprocessing
 # inspired by https://github.com/moses-smt/mosesdecoder/blob/master/scripts/tokenizer/tokenizer.perl used in nmt's examples
 
 # Load list of protected words/phrases (those will remain unbreaked, will be not tokenised)
-protected_phrases = []
-with open(preprocessing['protected_phrases_file'], 'r', encoding='utf-8') as protected_file:
-    protected_phrases = list(filter(None, protected_file.read().split("\n")))
 protected_phrases_regex = []
 with open(preprocessing['protected_phrases_regex_file'], 'r', encoding='utf-8') as protected_file:
     protected_phrases_regex = list(filter(lambda word: False if word[0] == '#' else True, filter(None, protected_file.read().split("\n"))))
@@ -28,17 +25,9 @@ def tokenize(sentence):
     sentence = re.sub(r'\s+', ' ', sentence)
     sentence = re.sub(r'[\x00-\x1f]', '', sentence)
 
-    # Protect phrases
-    i = 0
-    for phrase in protected_phrases:
-        if phrase in sentence:
-            sentence = sentence.replace(phrase, ' PROTECTEDPHRASE{}PROTECTEDPHRASE '.format(i))
-        i = i + 1
-
-    # Protected regex-based phrases
-    i = 0
+    # Regex-based protected phrases
     protected_phrases_regex_replacements = []
-    for phrase in protected_phrases_regex:
+    for i, phrase in enumerate(protected_phrases_regex):
 
         # If phrase was found in sentence
         if re.search(phrase, sentence):
@@ -50,7 +39,6 @@ def tokenize(sentence):
                 # Replace with placeholder exactly one occurrence starting with start indice and add to list
                 sentence = sentence[:p.start()] + sentence[p.start():].replace(p.groups()[0], ' PROTECTEDREGEXPHRASE{}PROTECTEDREGEXPHRASE '.format(i), 1)
                 protected_phrases_regex_replacements.append(p.groups()[0].strip().replace(" ", ""))
-                i = i + 1
 
     # Strip spaces and remove multi-spaces
     sentence = sentence.strip()
@@ -74,7 +62,6 @@ def tokenize(sentence):
 
     # Split sentence into words
     words = sentence.split()
-    i = 1
     sentence = []
 
     # For every word
@@ -94,8 +81,6 @@ def tokenize(sentence):
         # Add word to a sentence
         sentence.append(word)
 
-        i = i + 1
-
     # Join words as a sentence again
     sentence = " ".join(sentence)
 
@@ -104,7 +89,6 @@ def tokenize(sentence):
     sentence = re.sub(r'\s+', ' ', sentence)
 
     # Restore protected phrases and multidots
-    sentence = re.sub(r'PROTECTEDPHRASE([\d\s]+?)PROTECTEDPHRASE', lambda number: protected_phrases[int(number.group(1).replace(" ", ""))] , sentence)
     sentence = re.sub(r'PROTECTEDREGEXPHRASE([\d\s]+?)PROTECTEDREGEXPHRASE', lambda number: protected_phrases_regex_replacements[int(number.group(1).replace(" ", ""))] , sentence)
     sentence = re.sub(r'PROTECTEDPERIODS([\d\s]+?)PROTECTEDPERIODS', lambda number: " " + ("." * int(number.group(1).replace(" ", ""))), sentence)
 
