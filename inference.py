@@ -157,6 +157,7 @@ def start_inference(question):
 
     # Rerun inference() call
     return inference(question)
+    return inference_helper(question)
 
 # Model, flags and hparams
 inference_object = None
