@@ -83,5 +83,4 @@ init()
 
 for test in tests:
     detokenized_answers = detokenize([test[0]])
-    #print(test, detokenized_answers)
     print('[{}]  {}  ->  {}{}'.format(Fore.GREEN + 'PASS' + Fore.RESET if detokenized_answers[0] == test[1] else Fore.RED + 'FAIL' + Fore.RESET, test[0], test[1], '' if detokenized_answers[0] == test[1] else '  Result: {}'.format(detokenized_answers[0])))
