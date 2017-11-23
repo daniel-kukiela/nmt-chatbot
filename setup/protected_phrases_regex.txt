@@ -1,3 +1,7 @@
+# List of regex-based sentences that bypassing tokenization
+# Matching sentences will remain untouched after tokenization
+# Any matched spaces will be removed
+
 # Period non-breaking prefixes
 (?i)(adj ?\.)\s+
 (?i)(adm ?\.)\s+
