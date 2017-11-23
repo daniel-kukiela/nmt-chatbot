@@ -1,7 +1,7 @@
 # Regex-based rules for sentence detokenization
 # Make sure to return only one group as only first group is used (rest of them are ignored)
 # Write more complex rules first
-# If some space should remain after detokenization, match against it using \s
+# If some space should remain after detokenization, surround it with brackets: ( )
 
 (¯ (?:\\ )+_ \( ツ \) _ / ¯)
 (\(( )͡ °( )͜ ʖ( )͡ ° \))
