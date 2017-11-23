@@ -8,6 +8,7 @@ from nmt import nmt
 import tensorflow as tf
 from core.tokenizer import tokenize
 from core.phrase import score_answers
+import colorama
 
 
 current_stdout = None
@@ -165,16 +166,47 @@ inference_object = None
 inference_helper = start_inference
 
 # Main inference function
-def inference(question):
-    return inference_helper(question)
+def inference(question, include_blacklisted = True):
+    answers = inference_helper(question)
+    answers_rate = score_answers(answers)
+
+    try:
+        index = answers_rate.index(1)
+        score = 1
+    except:
+        index = None
+
+    if index is None and include_blacklisted:
+        try:
+            index = answers_rate.index(0)
+            score = 0
+        except:
+            index = 0
+            score = -1
+
+    if index is None:
+        index = 0
+        score = -1
+
+    return {'answer': answers[index], 'score': score}
+
+# Internal inference function (for direct call)
+def inference_internal(question):
+    answers = inference_helper(question)
+    answers_rate = score_answers(answers)
+    return (answers, answers_rate)
 
 # interactive mode
 if __name__ == "__main__":
 
     print("\n\nStarting interactive mode (first response will take a while):")
+    colorama.init()
 
     # QAs
     while True:
         question = input("\n> ")
-        answers = inference(question)
-        print("- " + ("\n- ".join(answers)))
+        answers, answers_rate = inference_internal(question)
+        i = 0
+        for i, _ in enumerate(answers):
+            print("{}- {}{}".format(colorama.Fore.GREEN if answers_rate[i] == 1 else colorama.Fore.YELLOW if answers_rate[i] == 0 else colorama.Fore.RED, answers[i], colorama.Fore.RESET))
+
