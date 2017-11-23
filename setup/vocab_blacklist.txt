@@ -1,0 +1,5 @@
+# Regex-based list of blacklisted sentenced
+# Any response matching any of that sentenced will be marked as blacklisted
+# Do not place <unk> here - it's blacklisted by default
+
+#(something)

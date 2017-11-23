@@ -1,0 +1,5 @@
+# List of regex-based replaces for answers
+# Format: regex ##->## replacement
+# Make sure to return only one group as only first group is used (rest of them are ignored)
+
+#(you) ##->## noone

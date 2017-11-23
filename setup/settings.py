@@ -44,6 +44,12 @@ preprocessing = {
 
     # file with replace rules for answers
     'answers_replace_file': os.path.join(package_path, 'setup/answers_replace.txt'),
+
+    # file with blacklisted answers
+    'vocab_blacklist_file': os.path.join(package_path, 'setup/vocab_blacklist.txt'),
+
+    # file with replace rules for vocab
+    'vocab_replace_file': os.path.join(package_path, 'setup/vocab_replace.txt'),
 }
 
 # hparams

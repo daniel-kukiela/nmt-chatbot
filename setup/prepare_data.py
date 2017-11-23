@@ -5,6 +5,7 @@ import errno
 from collections import Counter
 from setup.settings import preprocessing
 from core.tokenizer import tokenize
+from core.sentence import score_answers, replace_in_answers
 from tqdm import tqdm
 
 
@@ -56,7 +57,9 @@ def prepare():
         # If it's file with samples, make vocab
         if file_name == 'train.from' or file_name == 'train.to':
 
-            # Get up to 50k most common tokens
+            print("\nFile: {}".format(file_name.replace('train', 'vocab')))
+
+            # Get tokens
             vocab = " ".join(train_data).split()
 
             # Limit max length of vocab entity?
@@ -64,11 +67,32 @@ def prepare():
                 vocab = [entity for entity in vocab if len(entity) <= preprocessing['vocab_entity_len']]
 
             # Get nn most common entities
-            vocab = Counter(vocab).most_common(preprocessing['vocab_size'])
+            vocab = [entity for entity in Counter(vocab).elements()]
 
-            # Write them to a file
+            new_vocab = []
+
+            # Process every entity
+            for entity in tqdm(vocab):
+
+                # Replace
+                entity = replace_in_answers([entity], 'vocab')[0]
+
+                # Score
+                score = score_answers([entity], 'vocab')[0]
+
+                # Add
+                if score == 1:
+                    new_vocab.append(entity)
+
+            # Filter duplicates
+            vocab = set()
+            vocab = [entity for entity in new_vocab if not (entity in vocab or vocab.add(entity))]
+
+            # Write entities to a file
             with open('{}/{}'.format(preprocessing['train_folder'], file_name.replace('train', 'vocab')), 'w', encoding='utf-8') as vocab_file:
-                vocab_file.write("<unk>\n<s>\n</s>\n" + "\n".join([k for k, v in vocab]))
+                vocab_file.write("<unk>\n<s>\n</s>\n" + "\n".join(vocab[:preprocessing['vocab_size']]))
+            with open('{}/{}'.format(preprocessing['train_folder'], file_name.replace('train', 'vocab_unused')), 'w', encoding='utf-8') as vocab_file:
+                vocab_file.write("\n".join(vocab[preprocessing['vocab_size']:]))
 
 
 # Prepare training data set
