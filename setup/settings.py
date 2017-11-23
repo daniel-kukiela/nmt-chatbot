@@ -41,6 +41,9 @@ preprocessing = {
 
     # file with detokenizer rules
     'answers_detokenize_file': os.path.join(package_path, 'setup/answers_detokenize.txt'),
+
+    # file with replace rules for answers
+    'answers_replace_file': os.path.join(package_path, 'setup/answers_replace.txt'),
 }
 
 # hparams
