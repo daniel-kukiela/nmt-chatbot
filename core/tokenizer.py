@@ -62,24 +62,12 @@ def tokenize(sentence):
         for dots in list(set(m)):
             sentence = sentence.replace(dots, ' PROTECTEDPERIODS{}PROTECTEDPERIODS '.format(len(dots)))
 
-    # Separate some special charactes
-    sentence = re.sub(r'([^\w\s\.\'\`\,])', r' \1 ', sentence)
-
-    # Separate string, and ,string (but not number,number except for string at the end of sentence)
-    sentence = re.sub(r'([^\d]),', r'\1 , ', sentence)
-    sentence = re.sub(r',([^\d])', r' , \1', sentence)
-    sentence = re.sub(r'([\d]),$', r'\1 ,', sentence)
-
     # Normalize `->' and '' ->"
     sentence = re.sub(r'\`', '\'', sentence)
     sentence = re.sub(r'\'\'', '"', sentence)
 
-    # Separate apostrophes in a right way
-    sentence = re.sub(r'([^\W\d_])\'([^\W\d_])', '\\1 \' \\2', sentence)
-    sentence = re.sub(r'([^\W_])\'([^\w\d_])', '\\1 \' \\2', sentence)
-    sentence = re.sub(r'([^\w\d_])\'([^\W\d_])', '\\1 \' \\2', sentence)
-    sentence = re.sub(r'([^\w\d_])\'([^\w\d_])', '\\1 \'\\2', sentence)
-    sentence = re.sub(r'([\d])\'s', '\\1 \'s', sentence)
+    # Separate some special charactes
+    sentence = re.sub(r'([^\w\s\.])', r' \1 ', sentence)
 
     # Separate digits in numbers
     sentence = re.sub(r'([\d])', ' \\1 ', sentence)
@@ -96,7 +84,6 @@ def tokenize(sentence):
         m = re.match('(.+)\.$', word)
         if m:
             m = m.group(1)
-
             # If string still includes period
             if re.search('\.', m) and re.search(r'[^\w\d_]', m):
                 pass
@@ -115,9 +102,6 @@ def tokenize(sentence):
     # Strip spaces and remove multi-spaces
     sentence = sentence.strip()
     sentence = re.sub(r'\s+', ' ', sentence)
-
-    # .' at the end of the sentence
-    #sentence = re.sub(r'\.\'$', ' . \' ', sentence)
 
     # Restore protected phrases and multidots
     sentence = re.sub(r'PROTECTEDPHRASE([\d\s]+?)PROTECTEDPHRASE', lambda number: protected_phrases[int(number.group(1).replace(" ", ""))] , sentence)
