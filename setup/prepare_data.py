@@ -37,7 +37,7 @@ def prepare():
 
         train_data = None
 
-        # Read a fil
+        # Read a file
         with open('{}/{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8') as train_file:
             train_data = train_file.read()
 
