@@ -17,14 +17,10 @@ from setup.settings import preprocessing
 }'''
 # Hey, it's reddit, better use lowercased list (and lowercase matched word later in code)
 nonbreaking_prefixes = {
-    'a': 1, 'b': 1, 'c': 1, 'd': 1, 'e': 1, 'f': 1, 'g': 1, 'h': 1, 'i': 1, 'j': 1, 'k': 1, 'l': 1, 'm': 1, 'n': 1,
-    'o': 1, 'p': 1, 'q': 1, 'r': 1, 's': 1, 't': 1, 'u': 1, 'v': 1, 'w': 1, 'x': 1, 'y': 1, 'z': 1,
-    'adj': 1, 'adm': 1, 'adv': 1, 'asst': 1, 'bart': 1, 'bldg': 1, 'brig': 1, 'bros': 1, 'capt': 1, 'cmdr': 1, 'col': 1,
-    'comdr': 1, 'con': 1, 'corp': 1, 'cpl': 1, 'dR': 1, 'dr': 1, 'drs': 1, 'ens': 1,
-    'gen': 1, 'gov': 1, 'hon': 1, 'hr': 1, 'hosp': 1, 'insp': 1, 'lt': 1, 'mm': 1, 'mr': 1, 'mrs': 1, 'ms': 1, 'maj': 1,
-    'messrs': 1, 'mlle': 1, 'mme': 1, 'msgr': 1,
-    'op': 1, 'ord': 1, 'pfc': 1, 'ph': 1, 'prof': 1, 'pvt': 1, 'rep': 1, 'reps': 1, 'res': 1, 'rt': 1, 'sen': 1,
-    'sens': 1, 'sfc': 1, 'sgt': 1, 'sr': 1, 'st': 1, 'supt': 1, 'surg': 1,
+    'a': 1, 'b': 1, 'c': 1, 'd': 1, 'e': 1, 'f': 1, 'g': 1, 'h': 1, 'i': 1, 'j': 1, 'k': 1, 'l': 1, 'm': 1, 'n': 1, 'o': 1, 'p': 1, 'q': 1, 'r': 1, 's': 1, 't': 1, 'u': 1, 'v': 1, 'w': 1, 'x': 1, 'y': 1, 'z': 1,
+    'adj': 1, 'adm': 1, 'adv': 1, 'asst': 1, 'bart': 1, 'bldg': 1, 'brig': 1, 'bros': 1, 'capt': 1, 'cmdr': 1, 'col': 1, 'comdr': 1, 'con': 1, 'corp': 1, 'cpl': 1, 'dR': 1, 'dr': 1, 'drs': 1, 'ens': 1,
+    'gen': 1, 'gov': 1, 'hon': 1, 'hr': 1, 'hosp': 1, 'insp': 1, 'lt': 1, 'mm': 1, 'mr': 1, 'mrs': 1, 'ms': 1, 'maj': 1, 'messrs': 1, 'mlle': 1, 'mme': 1, 'msgr': 1,
+    'op': 1, 'ord': 1, 'pfc': 1, 'ph': 1, 'prof': 1, 'pvt': 1, 'rep': 1, 'reps': 1, 'res': 1, 'rt': 1, 'sen': 1, 'sens': 1, 'sfc': 1, 'sgt': 1, 'sr': 1, 'st': 1, 'supt': 1, 'surg': 1,
     'vs': 1, 'i.e': 1, 'rev': 1, 'e.g': 1,
     'no': 2, 'nos': 1, 'nrt': 2, 'nr': 1, 'pp': 2,
     'jan': 1, 'feb': 1, 'mar': 1, 'apr': 1, 'jun': 1, 'jul': 1, 'aug': 1, 'sep': 1, 'oct': 1, 'nov': 1, 'dec': 1
@@ -104,14 +100,11 @@ def tokenize(sentence):
             m = m.group(1)
 
             # If string still includes period and includes letter or equals non breaking word or is followed by word starting with lowercase letter (so is not new subsentence)
-            if (re.match('\.', m) and re.match(r'[^\w\d_]', m)) or (
-                    m.lower() in nonbreaking_prefixes and nonbreaking_prefixes[m.lower()] == 1) or (
-                    i < len(words) and re.match('^[a-z]', words[i])):
+            if (re.match('\.', m) and re.match(r'[^\w\d_]', m)) or (m.lower() in nonbreaking_prefixes and nonbreaking_prefixes[m.lower()] == 1) or (i < len(words) and re.match('^[a-z]', words[i])):
                 pass
 
             # If string is non breaking word followed by number
-            elif m.lower() in nonbreaking_prefixes and nonbreaking_prefixes[m.lower()] == 2 and i < len(
-                    words) and re.match('^[0-9]+', words[i]):
+            elif m.lower() in nonbreaking_prefixes and nonbreaking_prefixes[m.lower()] == 2 and i < len(words) and re.match('^[0-9]+', words[i]):
                 pass
 
             # Add space between word and period
@@ -134,8 +127,7 @@ def tokenize(sentence):
     sentence = re.sub(r'\.\'$', ' . \' ', sentence)
 
     # Restore protected phrases and multidots
-    sentence = re.sub(r'PROTECTEDPHRASE(\d+)PROTECTEDPHRASE', lambda number: protected_phrases[int(number.group(1))],
-                      sentence)
+    sentence = re.sub(r'PROTECTEDPHRASE(\d+)PROTECTEDPHRASE', lambda number: protected_phrases[int(number.group(1))], sentence)
     sentence = re.sub(r'PROTECTEDPERIODS(\d+)PROTECTEDPERIODS', lambda number: "." * int(number.group(1)), sentence)
 
     return sentence
