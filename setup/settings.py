@@ -39,6 +39,8 @@ preprocessing = {
     # file with blacklisted answers
     'responses_blacklist_file': os.path.join(package_path, 'setup/answers_blacklist.txt'),
 
+    # file with detokenizer rules
+    'answers_detokenize_file': os.path.join(package_path, 'setup/answers_detokenize.txt'),
 }
 
 # hparams

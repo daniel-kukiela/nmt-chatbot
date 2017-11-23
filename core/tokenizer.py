@@ -103,3 +103,62 @@ def tokenize(sentence):
     sentence = re.sub(r'PROTECTEDPERIODS([\d\s]+?)PROTECTEDPERIODS', lambda number: ("." * int(number.group(1).replace(" ", ""))), sentence)
 
     return sentence
+
+# list with regex-based detokenizer rules
+answers_detokenize_regex = None
+
+# Load detokenizer rules
+with open(preprocessing['answers_detokenize_file'], 'r', encoding='utf-8') as answers_detokenize_file:
+    answers_detokenize_regex = list(filter(lambda word: False if word[0] == '#' else True, filter(None, answers_detokenize_file.read().split("\n"))))
+
+# Returns detokenizes sentences
+def detokenize(answers):
+
+    detokenized_answers = []
+
+    # For every answer
+    for answer in answers:
+
+        # And every regex rule
+        for detokenize_regex in answers_detokenize_regex:
+
+            diffrence = 0
+
+            # If detokenize_regex was found in answer
+            if re.search(detokenize_regex, answer):
+
+                # Search for all occurrences and iterate thru them
+                regex = re.compile(detokenize_regex)
+                for p in regex.finditer(answer):
+
+                    # If there are more groups - process spaces that should stay in response
+                    if len(p.groups()) > 1:
+                        groups = p.groups()[1:]
+
+                        # Replace spaces that should stay with temporary placeholder
+                        for i, group in enumerate(groups):
+                            position = p.start(i+2) + (i)*22
+                            answer = answer[:position] + answer[position:].replace(" ", "##DONOTTOUCHTHISSPACE##", 1)
+
+                        # Update reges to match placeholders as spaces
+                        detokenize_regex = detokenize_regex.replace(' ', '(?: |##DONOTTOUCHTHISSPACE##)')
+
+                # Search for all occurrences and iterate thru them again
+                regex = re.compile(detokenize_regex)
+                for p in regex.finditer(answer):
+
+                    # Calculate data
+                    replace_from = p.groups()[0]
+                    replace_to = p.groups()[0].replace(" ", "")
+                    position = p.start(1) + diffrence
+                    diffrence += -len(replace_from) + len(replace_to)
+
+                    # Remove spaces
+                    answer = answer[:position] + answer[position:].replace(replace_from, replace_to, 1)
+
+        # Change placeholders back to spaces
+        answer = answer.replace("##DONOTTOUCHTHISSPACE##", ' ')
+
+        detokenized_answers.append(answer)
+
+    return detokenized_answers

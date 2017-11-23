@@ -1,0 +1,28 @@
+# Regex-based rules for sentence detokenization
+# Make sure to return only one group as only first group is used (rest of them are ignored)
+# Write more complex rules first
+# If some space should remain after detokenization, match against it using \s
+
+(¯ (?:\\ )+_ \( ツ \) _ / ¯)
+(\(( )͡ °( )͜ ʖ( )͡ ° \))
+(\( V \) \( ; (?:, )+; \) \( V \))
+(<(?: (?:\\|/))? 3)
+(?i)((?:O|@|\*) \. (?:O|@|\*))
+((?:;|@|◉|-|\^) (?:_ )+(?:;|@|◉|-|\^))
+(\( ⌐ ■ _ ■ \))
+(\(( )• _ • \) > ⌐ ■ - ■)
+((?:\\ )+\( '( )-( )' \) /)
+((?:\\ )+\( ' (?:u|=) ' \) /)
+((?:\\ )+\( = \) /)
+((?:\d )+)\d
+(?i)((?::|;|8|=|x) (?:'|- )?(?:\)|\(|\\|O|D|P|\]|/))
+(\d \. \d)
+(\d , \d)
+( (?:[A-Z]+ \.)+)
+((?: |$)/(?: |$))
+( \.)
+( '(?: |$))
+( ,)
+( :)
+( !)
+( \?)

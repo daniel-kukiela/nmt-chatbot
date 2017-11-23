@@ -6,7 +6,7 @@ import argparse
 from setup.settings import hparams, out_dir
 from nmt import nmt
 import tensorflow as tf
-from core.tokenizer import tokenize
+from core.tokenizer import tokenize, detokenize
 from core.sentence import score_answers
 import colorama
 
@@ -168,6 +168,7 @@ inference_helper = start_inference
 # Main inference function
 def inference(question, include_blacklisted = True):
     answers = inference_helper(question)
+    answers = detokenize(answers)
     answers_rate = score_answers(answers)
 
     try:
@@ -193,6 +194,7 @@ def inference(question, include_blacklisted = True):
 # Internal inference function (for direct call)
 def inference_internal(question):
     answers = inference_helper(question)
+    answers = detokenize(answers)
     answers_rate = score_answers(answers)
     return (answers, answers_rate)
 
