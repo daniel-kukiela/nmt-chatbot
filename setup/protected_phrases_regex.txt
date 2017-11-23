@@ -1,3 +1,4 @@
+# Period non-breaking prefixes
 (?i)(adj ?\.)\s+
 (?i)(adm ?\.)\s+
 (?i)(adv ?\.)\s+
