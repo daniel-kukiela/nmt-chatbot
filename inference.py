@@ -156,7 +156,6 @@ def start_inference(question):
     inference_helper = lambda question: do_inference(tokenize(question), *inference_object)
 
     # Rerun inference() call
-    return inference(question)
     return inference_helper(question)
 
 # Model, flags and hparams
