@@ -7,7 +7,7 @@ from setup.settings import preprocessing
 
 # Load list of protected words/phrases (those will remain unbreaked, will be not tokenised)
 protected_phrases_regex = []
-with open(preprocessing['protected_phrases_regex_file'], 'r', encoding='utf-8') as protected_file:
+with open(preprocessing['protected_phrases_file'], 'r', encoding='utf-8') as protected_file:
     protected_phrases_regex = list(filter(lambda word: False if word[0] == '#' else True, filter(None, protected_file.read().split("\n"))))
 
 # Tokenize sentense

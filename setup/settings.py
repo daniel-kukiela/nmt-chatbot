@@ -34,7 +34,7 @@ preprocessing = {
     'train_folder': train_dir,
 
     # file with protected phrases
-    'protected_phrases_regex_file': os.path.join(package_path, 'setup/protected_phrases_regex.txt'),
+    'protected_phrases_file': os.path.join(package_path, 'setup/protected_phrases.txt'),
 
     # file with blacklisted answers
     'responses_blacklist_file': os.path.join(package_path, 'setup/answers_blacklist.txt'),
