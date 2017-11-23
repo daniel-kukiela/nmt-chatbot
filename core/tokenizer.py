@@ -127,7 +127,7 @@ def tokenize(sentence):
     sentence = re.sub(r'\.\'$', ' . \' ', sentence)
 
     # Restore protected phrases and multidots
-    sentence = re.sub(r'PROTECTEDPHRASE(\d+)PROTECTEDPHRASE', lambda number: protected_phrases[int(number.group(1))], sentence)
-    sentence = re.sub(r'PROTECTEDPERIODS(\d+)PROTECTEDPERIODS', lambda number: "." * int(number.group(1)), sentence)
+    sentence = re.sub(r'PROTECTEDPHRASE([\d\s]+?)PROTECTEDPHRASE', lambda number: protected_phrases[int(number.group(1).replace(" ", ""))] , sentence)
+    sentence = re.sub(r'PROTECTEDPERIODS([\d\s]+?)PROTECTEDPERIODS', lambda number: " " + ("." * int(number.group(1).replace(" ", ""))), sentence)
 
     return sentence
