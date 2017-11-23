@@ -7,6 +7,7 @@ from setup.settings import hparams, out_dir
 from nmt import nmt
 import tensorflow as tf
 from core.tokenizer import tokenize
+from core.phrase import score_answers
 
 
 current_stdout = None
