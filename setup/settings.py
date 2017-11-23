@@ -37,6 +37,9 @@ preprocessing = {
     'protected_phrases_file': os.path.join(package_path, 'setup/protected_phrases.txt'),
     'protected_phrases_regex_file': os.path.join(package_path, 'setup/protected_phrases_regex.txt'),
 
+    # file with blacklisted answers
+    'responses_blacklist_file': os.path.join(package_path, 'setup/answers_blacklist.txt'),
+
 }
 
 # hparams
