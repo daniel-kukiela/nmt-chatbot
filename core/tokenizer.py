@@ -27,7 +27,10 @@ def tokenize(sentence):
 
     # Regex-based protected phrases
     protected_phrases_regex_replacements = []
-    for i, phrase in enumerate(protected_phrases_regex):
+    for phrase in protected_phrases_regex:
+
+        diffrence = 0
+        replacement = 0;
 
         # If phrase was found in sentence
         if re.search(phrase, sentence):
@@ -36,9 +39,16 @@ def tokenize(sentence):
             regex = re.compile(phrase)
             for p in regex.finditer(sentence):
 
-                # Replace with placeholder exactly one occurrence starting with start indice and add to list
-                sentence = sentence[:p.start()] + sentence[p.start():].replace(p.groups()[0], ' PROTECTEDREGEXPHRASE{}PROTECTEDREGEXPHRASE '.format(i), 1)
-                protected_phrases_regex_replacements.append(p.groups()[0].strip().replace(" ", ""))
+                # Calculate data
+                replace_from = p.groups()[0]
+                replace_to = p.groups()[0].replace(" ", "")
+                position = p.start(1) + diffrence
+                diffrence += -len(replace_from) + len(replace_to)
+
+                # Remove spaces
+                sentence = sentence[:position] + sentence[position:].replace(replace_from, ' PROTECTEDREGEXPHRASE{}PROTECTEDREGEXPHRASE '.format(replacement), 1)
+                protected_phrases_regex_replacements.append(replace_to)
+                replacement += 1
 
     # Strip spaces and remove multi-spaces
     sentence = sentence.strip()
@@ -90,6 +100,6 @@ def tokenize(sentence):
 
     # Restore protected phrases and multidots
     sentence = re.sub(r'PROTECTEDREGEXPHRASE([\d\s]+?)PROTECTEDREGEXPHRASE', lambda number: protected_phrases_regex_replacements[int(number.group(1).replace(" ", ""))] , sentence)
-    sentence = re.sub(r'PROTECTEDPERIODS([\d\s]+?)PROTECTEDPERIODS', lambda number: " " + ("." * int(number.group(1).replace(" ", ""))), sentence)
+    sentence = re.sub(r'PROTECTEDPERIODS([\d\s]+?)PROTECTEDPERIODS', lambda number: ("." * int(number.group(1).replace(" ", ""))), sentence)
 
     return sentence
