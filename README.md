@@ -42,7 +42,7 @@ Setup folder contains multiple "rules" files (All of them are regex-based:
 
 
 
-Test
+Tests
 -------------
 
 Every rules file has related test script. Those test scripts might be treated as some kind of unit testing. Every modification of fules files might be check against those tests but every modification should be also followed by new test cases in those scripts.
@@ -57,7 +57,7 @@ Test scripts will display check status, checked sentence and evetually check res
 More detailed informations about training a model
 -------------
 
-setup/settings.py consists of multiple settings"
+setup/settings.py consists of multiple settings:
 
  - untouched file/folder paths should fit for most cases
  - "preprocessing" dictionary should be easy to understand
@@ -92,7 +92,7 @@ For every question will be printed up to number of responses set in setup/settin
 
  - green - first one with that colour is a candidate  to be returned. Answers with tah color passed clacklist check (setup/response_blacklist.txt)
  - orange - still proper responses, but doesn't pass check agains blacklist
- - red - inproper response - include <unk>
+ - red - inproper response - includes `<unk>`
 
 Steps from the question to the answers:
 
@@ -100,7 +100,7 @@ Steps from the question to the answers:
  2. Compute up to number of responses set in setup/settings.py
  3. Detokenize answers using rules from setup/answers_detokenized.txt
  3. Replace responses or their parts using rules from setup/answers_replace.txt
- 4. Score responses with -1 (includes <unk>, 0 (matches agains at least one rule in setup/answers_blacklist.txt file) or 1 (passes all checks)
+ 4. Score responses with -1 (includes `<unk>`, 0 (matches agains at least one rule in setup/answers_blacklist.txt file) or 1 (passes all checks)
  5. Return (show with interactive mode) responses
 
 
@@ -127,7 +127,7 @@ Function will return dictionary containing:
 
 Score:
 
- - -1 - inproper response - includes <unk>
+ - -1 - inproper response - includes `<unk>`
  - 0 - proper response but blacklisted
  - 1 - proper response - passed checks
 
