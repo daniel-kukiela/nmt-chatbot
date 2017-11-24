@@ -190,7 +190,7 @@ def inference(question, include_blacklisted = True):
         index = 0
         score = -1
 
-    return {'answer': answers[index], 'score': score}
+    return {'answers': answers, 'index': index, 'score': score}
 
 # Internal inference function (for direct call)
 def inference_internal(question):
