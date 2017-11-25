@@ -169,7 +169,7 @@ inference_helper = start_inference
 def inference(question, include_blacklisted = True):
     answers = inference_helper(question)
     answers = detokenize(answers)
-    answers = replace_in_answers(answers)
+    answers = replace_in_answers(answers, 'answers')
     answers_rate = score_answers(answers)
 
     try:
@@ -196,7 +196,7 @@ def inference(question, include_blacklisted = True):
 def inference_internal(question):
     answers = inference_helper(question)
     answers = detokenize(answers)
-    answers = replace_in_answers(answers)
+    answers = replace_in_answers(answers, 'answers')
     answers_rate = score_answers(answers)
     return (answers, answers_rate)
 
