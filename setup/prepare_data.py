@@ -11,12 +11,12 @@ from tqdm import tqdm
 
 # Files to be prepared
 files = {
-    'train.from': {'amount': 1, 'up_to': -1}, # copy all of data (up to "samples")
+    'train.from':   {'amount': 1,  'up_to': -1}, # copy all of data (up to "samples")
     'tst2012.from': {'amount': .1, 'up_to': preprocessing['test_size']},  # copy 1/10th but up to 'test_size'
     'tst2013.from': {'amount': .1, 'up_to': preprocessing['test_size']},
-    'train.to': {'amount': 1, 'up_to': -1},
-    'tst2012.to': {'amount': .1, 'up_to': preprocessing['test_size']},
-    'tst2013.to': {'amount': .1, 'up_to': preprocessing['test_size']},
+    'train.to':     {'amount': 1,  'up_to': -1},
+    'tst2012.to':   {'amount': .1, 'up_to': preprocessing['test_size']},
+    'tst2013.to':   {'amount': .1, 'up_to': preprocessing['test_size']},
 }
 
 # Prepare all files
@@ -67,7 +67,7 @@ def prepare():
                 vocab = [entity for entity in vocab if len(entity) <= preprocessing['vocab_entity_len']]
 
             # Get nn most common entities
-            vocab = [entity for entity in Counter(vocab).elements()]
+            vocab = [entity for entity, v in Counter(vocab).most_common()]
 
             new_vocab = []
 
