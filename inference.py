@@ -170,7 +170,7 @@ def inference(question, include_blacklisted = True):
     answers = inference_helper(question)
     answers = detokenize(answers)
     answers = replace_in_answers(answers, 'answers')
-    answers_rate = score_answers(answers)
+    answers_rate = score_answers(answers, 'answers')
 
     try:
         index = answers_rate.index(1)
