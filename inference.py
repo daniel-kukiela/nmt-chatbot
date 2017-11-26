@@ -210,7 +210,6 @@ if __name__ == "__main__":
     while True:
         question = input("\n> ")
         answers, answers_rate = inference_internal(question)
-        i = 0
         for i, _ in enumerate(answers):
             print("{}- {}{}".format(colorama.Fore.GREEN if answers_rate[i] == 1 else colorama.Fore.YELLOW if answers_rate[i] == 0 else colorama.Fore.RED, answers[i], colorama.Fore.RESET))
 
