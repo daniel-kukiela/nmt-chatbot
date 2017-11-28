@@ -77,6 +77,13 @@ tests = [
     ['Why ?', 'Why?'],
     ['M . O . R . E .', 'M.O.R.E.'],
     ['word ...', 'word...'],
+    ['https : / / www.youtube.com / watch ? v = r 8 b 0 PWR 1 qxI', 'https://www.youtube.com/watch?v=r8b0PWR1qxI'],
+    ['test https : / / www.youtube.com / watch ? v = r 8 b 0 PWR 1 qxI test', 'test https://www.youtube.com/watch?v=r8b0PWR1qxI test'],
+    ['http://i.imgur.com/vncZ 8 J 3.gif', 'http://i.imgur.com/vncZ 8 J 3.gif'],
+    ['test http://i.imgur.com/vncZ 8 J 3.gif test', 'test http://i.imgur.com/vncZ 8 J 3.gif test'],
+    ['Thanks . : )', 'Thanks. :)'],
+    ['Thanks ! : )', 'Thanks! :)'],
+    ['$ 3 9 0', '$390']
 ]
 
 init()

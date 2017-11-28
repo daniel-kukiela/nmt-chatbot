@@ -3,6 +3,8 @@
 # Write more complex rules first
 # If some space should remain after detokenization, surround it with brackets: ( )
 
+(youtube\.com \/ watch \? v = (?:[0-9a-zA-Z]\s?){10})
+(i\.imgur\.com \/ (?:[0-9a-zA-Z]\s?)*?\.)
 (¯ (?:\\ )+_ \( ツ \) _ / ¯)
 (\(( )͡ °( )͜ ʖ( )͡ ° \))
 (\( V \) \( ; (?:, )+; \) \( V \))
@@ -20,9 +22,10 @@
 (\d , \d)
 ( (?:[A-Z]+ \.)+)
 ((?: |$)/(?: |$))
+(\$ [0-9])
 ( \.)
 ( '(?: |$))
 ( ,)
-( :)
+([^\.!\?,] :)
 ( !)
 ( \?)
