@@ -90,6 +90,7 @@ tests = [
     ['o 7', 'o7'],
     ['No 7', 'No 7'],
     ['o 7.', 'o7.'],
+    ['/ r / me_irl', '/r/me_irl']
 ]
 
 init()
