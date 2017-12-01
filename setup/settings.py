@@ -19,7 +19,7 @@ preprocessing = {
     'samples': -1,
 
     # vocab max size
-    'vocab_size': 100000,
+    'vocab_size': 15000,
 
     # test sets' max size
     'test_size': 100,
@@ -63,13 +63,15 @@ hparams = {
     'test_prefix': os.path.join(train_dir, "tst2013"),
     'out_dir': out_dir,
     'num_train_steps': 500000,
-    'num_layers': 5,
-    'num_units': 1024,
+    'num_layers': 2,
+    'num_units': 512,
 #    'override_loaded_hparams': True,
-    'decay_factor': 0.99998,
-    'decay_steps': 1,
+#    'decay_factor': 0.99998,
+#    'decay_steps': 1,
 #    'residual': True,
-    'start_decay_step': 1,
+#    'start_decay_step': 1,
+    'optimizer': 'adam',
+    'encoder_type': 'bi',
     'beam_width': 10,
     'length_penalty_weight': 1.0,
     'num_translations_per_input': 10
