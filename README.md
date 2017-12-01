@@ -18,7 +18,7 @@ Setup
 
 Steps to setup project for your needs:
 
- 1. Download or clone package
+ 1. Download or clone package, make sure you have the requirements met.
  2. Edit setup/settings.py
  3. (optional) Edit text files containing rules
  4. Place training data inside "new_data" folder (train.(from|to), tst2012.(from|to)m tst2013(from|to))
