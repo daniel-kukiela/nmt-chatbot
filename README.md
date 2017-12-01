@@ -18,12 +18,13 @@ Setup
 
 Steps to setup project for your needs:
 
- 1. Download or clone (git clone --recursive) package, make sure you have the requirements met.
- 2. Edit setup/settings.py
- 3. (optional) Edit text files containing rules
- 4. Place training data inside "new_data" folder (train.(from|to), tst2012.(from|to)m tst2013(from|to))
- 7. Run setup/prepare_data.py - new folder called "data" will be created with prepared training data
- 8. Run train.py
+ 1. Download or clone package: git clone --recursive https://github.com/daniel-kukiela/nmt-chatbot/
+ 2. pip3 install -r requirements.txt
+ 3. Edit setup/settings.py
+ 4. (optional) Edit text files containing rules
+ 5. Place training data inside "new_data" folder (train.(from|to), tst2012.(from|to)m tst2013(from|to))
+ 6. Run setup/prepare_data.py - new folder called "data" will be created with prepared training data
+ 7. Run train.py
 
 
 
