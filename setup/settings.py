@@ -72,6 +72,7 @@ hparams = {
 #    'start_decay_step': 1,
     'optimizer': 'adam',
     'encoder_type': 'bi',
+    'learning_rate':0.001,
     'beam_width': 10,
     'length_penalty_weight': 1.0,
     'num_translations_per_input': 10
