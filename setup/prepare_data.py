@@ -40,15 +40,14 @@ def prepare():
 
         # Read a file
         with open('{}/{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8') as train_file:
-            train_data = train_file.read()
+            train_data = train_file.readlines()
 
         # Split sentences by lines and get appropriate amount according to "samples" variable
-        train_data = train_data.split("\n")
         amount = int(min(amounts['amount'] * preprocessing['samples'] if preprocessing['samples'] > 0 else len(train_data), amounts['up_to'] if amounts['up_to'] > 0 else len(train_data)))
         train_data = train_data[:amount]
 
         # Tokenize every sentence
-        train_data = [tokenize(sentence) for sentence in tqdm(train_data)]
+        train_data = [tokenize(sentence.replace("\n","")) for sentence in tqdm(train_data)]
 
         # Wtite sentences to a file
         with open('{}/{}'.format(preprocessing['train_folder'], file_name), 'w', encoding='utf-8') as vocab_file:
