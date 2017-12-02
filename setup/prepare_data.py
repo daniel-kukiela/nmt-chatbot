@@ -67,7 +67,7 @@ def prepare():
             with open('{}/{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8',
                       buffering=131072) as in_file:
 
-                # Iteraye every 19k lines
+                # Iterate every 10k lines
                 for rows in tqdm(read_lines(in_file, 10000, '')):
 
                     # Process using multiprocessing
@@ -106,7 +106,7 @@ def prepare():
         vocab_thread1.start()
         vocab_thread2 = Thread(target=append_vocab, args=(rows, 2))
         vocab_thread2.start()
-        write_thread = Thread(target=write_lines, args=(out_file, rows, True))
+        write_thread = Thread(target=write_lines, args=(out_file, rows))
         write_thread.start()
         vocab_thread1.join()
         vocab_thread2.join()
@@ -138,15 +138,19 @@ def prepare():
 
 # Helper function, reads 'amount' number of lines from file handler
 def read_lines(file, amount, fillvalue=None):
+
     args = [iter(file)] * amount
     return zip_longest(*args, fillvalue=fillvalue)
 
 
 # Writle batch of lines to a file
-def write_lines(file, lines, last=False):
+def write_lines(file, lines):
+
     # Handling empty lines (described above)
-    if last:
-        lines = filter(None, list(lines))
+
+    if not len(lines) or lines[-1] == '':
+        lines = list(filter(None, list(lines)))
+        last = True
 
     file.write('\n'.join(lines) + ('' if last else '\n'))
 
