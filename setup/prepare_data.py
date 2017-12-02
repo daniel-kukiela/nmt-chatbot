@@ -43,7 +43,7 @@ def prepare():
 
         vocab = []
 
-        print("\nFile: {} (iteration = 100k lines)".format(file_name))
+        print("\nFile: {} (iteration = 10k lines)".format(file_name))
 
         # Output file handler
         out_file = open('{}/{}'.format(preprocessing['train_folder'], file_name), 'w', encoding='utf-8', buffering=131072)
