@@ -23,7 +23,7 @@ files = {
     'tst2013.to':   {'amount': .1, 'up_to': preprocessing['test_size']},
 }
 
-vocab = []
+vocab = Counter([])
 
 # Prepare all files
 def prepare():
@@ -41,7 +41,7 @@ def prepare():
     # Iterate thru files and prepare them
     for file_name, amounts in files.items():
 
-        vocab = []
+        vocab = Counter([])
 
         print("\nFile: {} (iteration = 10k lines)".format(file_name))
 
@@ -112,7 +112,7 @@ def prepare():
             print("\nFile: {} (saving vocab)".format(file_name.replace('train', 'vocab')))
 
             # Get most common entities
-            vocab = [entity for entity, v in Counter(vocab).most_common()]
+            vocab = [entity for entity, v in vocab.most_common()]
 
             # Do replacements
             new_vocab = [replace_in_answers([entity], 'vocab')[0] for entity in vocab]
@@ -157,7 +157,7 @@ def append_vocab(lines, thread):
         local_vocab.extend(line.split(' '))
 
     # Add entities to vocab
-    vocab.extend(local_vocab)
+    vocab.update(local_vocab)
 
 # Prepare training data set
 if __name__ == "__main__":
