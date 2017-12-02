@@ -123,9 +123,9 @@ def prepare():
             # Do replacements
             new_vocab = [replace_in_answers([entity], 'vocab')[0] for entity in vocab]
 
-            # Filter out duplicates
+            # Filter out duplicates and empty entities
             vocab = set()
-            vocab = [entity for entity in new_vocab if not (entity in vocab or vocab.add(entity))]
+            vocab = [entity for entity in new_vocab if not (entity in vocab or vocab.add(entity)) and entity]
 
             # Write entities to a file
             with open('{}/{}'.format(preprocessing['train_folder'], file_name.replace('train', 'vocab')), 'w',
