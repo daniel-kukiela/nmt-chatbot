@@ -28,7 +28,7 @@ It is *highly* recommended that you use Python 3.6+. Python 3.4 and 3.5 is likel
  7. Place training data inside "new_data" folder (train.(from|to), tst2012.(from|to)m tst2013(from|to)). We have provided some sample data for those who just want to do a quick test drive. 
  8. ```$ python prepare_data.py``` ...Run setup/prepare_data.py - new folder called "data" will be created with prepared training data
  9. ```$ cd ../```
- 10. python train.py ...Run train.py
+ 10. ```$ python train.py``` Begin training
 
 
 
