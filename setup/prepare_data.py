@@ -7,11 +7,15 @@ from setup.settings import preprocessing
 from core.tokenizer import tokenize
 from core.sentence import score_answers, replace_in_answers
 from tqdm import tqdm
+from itertools import zip_longest
+from multiprocessing import Pool
+from threading import Thread
+import time
 
 
 # Files to be prepared
 files = {
-    'train.from':   {'amount': 1,  'up_to': -1}, # copy all of data (up to "samples")
+    'train.from':   {'amount': 1,  'up_to': -1},  # copy all of data (up to "samples")
     'tst2012.from': {'amount': .1, 'up_to': preprocessing['test_size']},  # copy 1/10th but up to 'test_size'
     'tst2013.from': {'amount': .1, 'up_to': preprocessing['test_size']},
     'train.to':     {'amount': 1,  'up_to': -1},
@@ -19,8 +23,11 @@ files = {
     'tst2013.to':   {'amount': .1, 'up_to': preprocessing['test_size']},
 }
 
+vocab = []
+
 # Prepare all files
 def prepare():
+    global vocab
 
     print("\nPreparing training set from raw set")
 
@@ -34,65 +41,123 @@ def prepare():
     # Iterate thru files and prepare them
     for file_name, amounts in files.items():
 
-        print("\nFile: {}".format(file_name))
+        vocab = []
 
-        train_data = None
+        print("\nFile: {} (iteration = 100k lines)".format(file_name))
 
-        # Read a file
-        with open('{}/{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8') as train_file:
-            train_data = train_file.readlines()
+        # Output file handler
+        out_file = open('{}/{}'.format(preprocessing['train_folder'], file_name), 'w', encoding='utf-8', buffering=131072)
 
-        # Split sentences by lines and get appropriate amount according to "samples" variable
-        amount = int(min(amounts['amount'] * preprocessing['samples'] if preprocessing['samples'] > 0 else len(train_data), amounts['up_to'] if amounts['up_to'] > 0 else len(train_data)))
-        train_data = train_data[:amount]
+        # Maximum number of lines
+        read = 0
+        amount = int(min(amounts['amount'] * preprocessing['samples'] if preprocessing['samples'] > 0 else 10**20, amounts['up_to'] if amounts['up_to'] > 0 else 10**20))
 
-        # Tokenize every sentence
-        train_data = [tokenize(sentence.replace("\n","")) for sentence in tqdm(train_data)]
+        # Prepare thread variables
+        write_thread = None
+        vocab_thread1 = None
+        vocab_thread2 = None
 
-        # Wtite sentences to a file
-        with open('{}/{}'.format(preprocessing['train_folder'], file_name), 'w', encoding='utf-8') as vocab_file:
-            vocab_file.write("\n".join(train_data))
+        # We are going to use multiprocessing for tokenization, as it's cpu intensive
+        with Pool(processes=preprocessing['cpu_count']) as pool:
 
-        # If it's file with samples, make vocab
+            # Open input file
+            with open('{}/{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072) as in_file:
+
+                # Iteraye every 19k lines
+                for rows in tqdm(read_lines(in_file, 10000, '')):
+
+                    # Process using multiprocessing
+                    rows = pool.map_async(tokenize, rows, 100).get()
+
+                    # Join running threads from previous loop
+                    if write_thread is not None:
+                        write_thread.join()
+                        vocab_thread1.join()
+                        vocab_thread2.join()
+
+                    # If number of lines greater than limit or EOF - break
+                    # We are leaving before last save as we have to handle last batch diffrently
+                    # zip_longest in read_lines adds extra empty lines up to batch size and we need to remove them
+                    # but only for last batch - no need to do that for every batch
+                    assert len(rows) == 10000
+                    read += 10000
+                    if read >= amount:
+                        break
+
+                    # We are going to process vocab in two threads - a bit faster than one and we need shared memory
+                    # Also multiprocessing is slower here
+                    vocab_thread1 = Thread(target=append_vocab, args=(rows,1))
+                    vocab_thread1.start()
+                    vocab_thread2 = Thread(target=append_vocab, args=(rows,2))
+                    vocab_thread2.start()
+
+                    # And thread for saving tokenized data to putput file
+                    write_thread = Thread(target=write_lines, args=(out_file, rows))
+                    write_thread.start()
+
+        # Last vocab parts and last lines to write
+        vocab_thread1 = Thread(target=write_lines, args=(out_file, rows, True))
+        vocab_thread1.start()
+        vocab_thread2 = Thread(target=write_lines, args=(out_file, rows, True))
+        vocab_thread2.start()
+        write_thread = Thread(target=write_lines, args=(out_file, rows))
+        write_thread.start()
+        vocab_thread1.join()
+        vocab_thread2.join()
+        write_thread.join()
+
+        # If it's train file, make vocab
         if file_name == 'train.from' or file_name == 'train.to':
 
-            print("\nFile: {}".format(file_name.replace('train', 'vocab')))
+            print("\nFile: {} (saving vocab)".format(file_name.replace('train', 'vocab')))
 
-            # Get tokens
-            vocab = " ".join(train_data).split()
-
-            # Limit max length of vocab entity?
-            if preprocessing['vocab_entity_len'] > 0:
-                vocab = [entity for entity in vocab if len(entity) <= preprocessing['vocab_entity_len']]
-
-            # Get nn most common entities
+            # Get most common entities
             vocab = [entity for entity, v in Counter(vocab).most_common()]
 
-            new_vocab = []
+            # Do replacements
+            new_vocab = [replace_in_answers([entity], 'vocab')[0] for entity in vocab]
 
-            # Process every entity
-            for entity in tqdm(vocab):
-
-                # Replace
-                entity = replace_in_answers([entity], 'vocab')[0]
-
-                # Score
-                score = score_answers([entity], 'vocab')[0]
-
-                # Add
-                if score == 1:
-                    new_vocab.append(entity)
-
-            # Filter duplicates
+            # Filter out duplicates
             vocab = set()
             vocab = [entity for entity in new_vocab if not (entity in vocab or vocab.add(entity))]
 
             # Write entities to a file
-            with open('{}/{}'.format(preprocessing['train_folder'], file_name.replace('train', 'vocab')), 'w', encoding='utf-8') as vocab_file:
+            with open('{}/{}'.format(preprocessing['train_folder'], file_name.replace('train', 'vocab')), 'w', encoding='utf-8', buffering=131072) as vocab_file:
                 vocab_file.write("<unk>\n<s>\n</s>\n" + "\n".join(vocab[:preprocessing['vocab_size']]))
-            with open('{}/{}'.format(preprocessing['train_folder'], file_name.replace('train', 'vocab_unused')), 'w', encoding='utf-8') as vocab_file:
+            with open('{}/{}'.format(preprocessing['train_folder'], file_name.replace('train', 'vocab_unused')), 'w', encoding='utf-8', buffering=131072) as vocab_file:
                 vocab_file.write("\n".join(vocab[preprocessing['vocab_size']:]))
 
+# Helper function, reads 'amount' number of lines from file handler
+def read_lines(file, amount, fillvalue=None):
+    args = [iter(file)] * amount
+    return zip_longest(*args, fillvalue=fillvalue)
+
+# Writle batch of lines to a file
+def write_lines(file, lines, last = False):
+
+    # Handling empty lines (described above)
+    if last:
+        lines = filter(None, list(lines))
+
+    file.write('\n'.join(lines) + '\n')
+
+# Append tokens to vocab
+def append_vocab(lines, thread):
+    global vocab
+
+    # Split lines for that vocab thread
+    local_vocab = []
+    if thread == 1:
+        lines = lines[:5000]
+    else:
+        lines = lines[5000:]
+
+    # Add entities
+    for line in lines:
+        local_vocab.extend(line.split(' '))
+
+    # Add entities to vocab
+    vocab.extend(local_vocab)
 
 # Prepare training data set
 if __name__ == "__main__":

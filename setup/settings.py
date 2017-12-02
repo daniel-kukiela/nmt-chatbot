@@ -24,9 +24,6 @@ preprocessing = {
     # test sets' max size
     'test_size': 100,
 
-    # vocab max entity length (-1 for no limit)
-    'vocab_entity_len': -1,
-
     # source (raw) data folder
     'source_folder': source_dir,
 
@@ -50,6 +47,9 @@ preprocessing = {
 
     # file with replace rules for vocab
     'vocab_replace_file': os.path.join(package_path, 'setup/vocab_replace.txt'),
+
+    # number of processes to be spawned during tokenization (leave None for os.cpu_count())
+    'cpu_count': None,
 }
 
 # hparams

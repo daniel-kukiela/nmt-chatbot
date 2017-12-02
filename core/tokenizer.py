@@ -1,7 +1,8 @@
 import html
-import re
+import regex as re
+#import re
 from setup.settings import preprocessing
-
+import time
 
 # inspired by https://github.com/moses-smt/mosesdecoder/blob/master/scripts/tokenizer/tokenizer.perl used in nmt's examples
 
@@ -10,10 +11,47 @@ protected_phrases_regex = []
 with open(preprocessing['protected_phrases_file'], 'r', encoding='utf-8') as protected_file:
     protected_phrases_regex = list(filter(lambda word: False if word[0] == '#' else True, filter(None, protected_file.read().split("\n"))))
 
+# Prepare regex of protrcted phrases (for speed)
+matched_regexes = []
+unmatched_regexes = []
+phrase = ''
+# Join multiple regexes of the same type into big one
+for protected_phrase_regex in protected_phrases_regex:
+    matched_regex = re.search(r'\(\?:\^\|\\s\)\(\?i:\((.*?) \?\\.\)\)', protected_phrase_regex)
+    if matched_regex:
+        matched_regexes.append(matched_regex.group(1))
+    else:
+        unmatched_regexes.append(protected_phrase_regex)
+if protected_phrase_regex:
+    phrase = ('(?:^|\s)(?i:((?:{}) ?\.))'.format('|'.join(matched_regexes)) if matched_regexes else '')\
+             + ('|(?:' + (')|(?:'.join(unmatched_regexes)) + ')' if unmatched_regexes else '')
+
+# Compile regexes
+regex = {
+    'special': re.compile(r'[\x00-\x1f]+'),
+    'protected': re.compile(phrase),
+    'periods': re.compile('\.{2,}'),
+    'separate': re.compile(r'([^\w\s\.])'),
+    'digits': re.compile(r'([\d])'),
+    'joined': re.compile(r'[^\w\d_]'),
+    'spaces': re.compile(r'\s+'),
+    'restorephrases': re.compile(r'PROTECTEDREGEXPHRASE([\d\s]+?)PROTECTEDREGEXPHRASE'),
+    'restoreperiods': re.compile(r'PROTECTEDPERIODS([\d\s]+?)PROTECTEDPERIODS'),
+}
+
+protected_phrases_replace = []
+protected_phrases_counter = 0
+
 # Tokenize sentense
 def tokenize(sentence):
+
+    global protected_phrases_replace, protected_phrases_counter, regex
+    protected_phrases_replace = []
+    protected_phrases_counter = 0
+    protected_periods_counter = 0
+
     # Remove special tokens
-    sentence = re.sub('<unk>|<s>|</s>', '', sentence, flags=re.IGNORECASE)
+    sentence = sentence.replace('<unk>', '').replace('<s>', '').replace('</s>', '')
 
     # Decode entities
     sentence = html.unescape(sentence)
@@ -22,53 +60,27 @@ def tokenize(sentence):
     sentence = sentence.strip()
 
     # Remove white characters inside sentence
-    sentence = re.sub(r'\s+', ' ', sentence)
-    sentence = re.sub(r'[\x00-\x1f]', '', sentence)
+    sentence = regex['special'].sub('', sentence)
 
     # Regex-based protected phrases
-    protected_phrases_regex_replacements = []
-    for phrase in protected_phrases_regex:
-
-        diffrence = 0
-        replacement = 0;
-
-        # If phrase was found in sentence
-        if re.search(phrase, sentence):
-
-            # Search for all occurrences and iterate thru them
-            regex = re.compile(phrase)
-            for p in regex.finditer(sentence):
-
-                # Calculate data
-                replace_from = p.groups()[0]
-                replace_to = p.groups()[0].replace(" ", "")
-                position = p.start(1) + diffrence
-                diffrence += -len(replace_from) + len(replace_to)
-
-                # Remove spaces
-                sentence = sentence[:position] + sentence[position:].replace(replace_from, ' PROTECTEDREGEXPHRASE{}PROTECTEDREGEXPHRASE '.format(replacement), 1)
-                protected_phrases_regex_replacements.append(replace_to)
-                replacement += 1
-
-    # Strip spaces and remove multi-spaces
-    sentence = sentence.strip()
-    sentence = re.sub(r'\s+', ' ', sentence)
+    if(regex['protected'].search(sentence)):
+        sentence = regex['protected'].sub(replace, sentence)
 
     # Protect multi-periods
-    m = re.findall('\.{2,}', sentence)
+    m = regex['periods'].findall(sentence)
     if m:
+        protected_periods_counter += 1
         for dots in list(set(m)):
             sentence = sentence.replace(dots, ' PROTECTEDPERIODS{}PROTECTEDPERIODS '.format(len(dots)))
 
     # Normalize `->' and '' ->"
-    sentence = re.sub(r'\`', '\'', sentence)
-    sentence = re.sub(r'\'\'', '"', sentence)
+    sentence = sentence.replace('`', '\'').replace('\'\'', '"')
 
     # Separate some special charactes
-    sentence = re.sub(r'([^\w\s\.])', r' \1 ', sentence)
+    sentence = regex['separate'].sub(r' \1 ', sentence)
 
     # Separate digits in numbers
-    sentence = re.sub(r'([\d])', ' \\1 ', sentence)
+    sentence = regex['digits'].sub(' \\1 ', sentence)
 
     # Split sentence into words
     words = sentence.split()
@@ -78,11 +90,10 @@ def tokenize(sentence):
     for word in words:
 
         # Find if it ends with period
-        m = re.match('(.+)\.$', word)
-        if m:
-            m = m.group(1)
+        if word[-1] == '.':
+            m = word.rstrip('.')
             # If string still includes period
-            if re.search('\.', m) and re.search(r'[^\w\d_]', m):
+            if '.' in m and regex['joined'].search(m):
                 pass
 
             else:
@@ -96,13 +107,24 @@ def tokenize(sentence):
 
     # Strip spaces and remove multi-spaces
     sentence = sentence.strip()
-    sentence = re.sub(r'\s+', ' ', sentence)
+    sentence = regex['spaces'].sub(' ', sentence)
 
     # Restore protected phrases and multidots
-    sentence = re.sub(r'PROTECTEDREGEXPHRASE([\d\s]+?)PROTECTEDREGEXPHRASE', lambda number: protected_phrases_regex_replacements[int(number.group(1).replace(" ", ""))] , sentence)
-    sentence = re.sub(r'PROTECTEDPERIODS([\d\s]+?)PROTECTEDPERIODS', lambda number: ("." * int(number.group(1).replace(" ", ""))), sentence)
+    if protected_phrases_counter:
+        sentence = regex['restorephrases'].sub(lambda number: protected_phrases_replace[int(number.group(1).replace(" ", ""))], sentence)
+    if protected_periods_counter:
+        sentence = regex['restoreperiods'].sub(lambda number: ("." * int(number.group(1).replace(" ", ""))), sentence)
 
     return sentence
+
+# Helper function for re.sub - not only replaces, but also saves replaced entity
+def replace(entity):
+    global protected_phrases_replace, protected_phrases_counter
+    phrase = list(filter(None, list(entity.groups())))[0]
+    replacement = entity.group(0).replace(phrase, ' PROTECTEDREGEXPHRASE{}PROTECTEDREGEXPHRASE '.format(protected_phrases_counter))
+    protected_phrases_replace.append(phrase)
+    protected_phrases_counter += 1
+    return replacement
 
 # list with regex-based detokenizer rules
 answers_detokenize_regex = None
