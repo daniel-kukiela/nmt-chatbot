@@ -18,7 +18,7 @@ Setup
 
 Steps to setup project for your needs:
 
- 1. git clone --recursive https://github.com/daniel-kukiela/nmt-chatbot
+ 1. ```git clone --recursive https://github.com/daniel-kukiela/nmt-chatbot```
  2. cd nmt-chatbot
  3. pip install -r requirements.txt
  4. cd setup
