@@ -197,7 +197,7 @@ def inference_internal(question):
     answers = inference_helper(question)
     answers = detokenize(answers)
     answers = replace_in_answers(answers, 'answers')
-    answers_rate = score_answers(answers)
+    answers_rate = score_answers(answers, 'answers')
     return (answers, answers_rate)
 
 # interactive mode
