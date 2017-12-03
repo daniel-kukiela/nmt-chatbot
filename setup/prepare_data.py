@@ -147,7 +147,7 @@ def read_lines(file, amount, fillvalue=None):
 def write_lines(file, lines):
 
     # Handling empty lines (described above)
-
+    last = False
     if not len(lines) or lines[-1] == '':
         lines = list(filter(None, list(lines)))
         last = True
