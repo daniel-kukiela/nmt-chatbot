@@ -83,10 +83,11 @@ def prepare():
                     # We are leaving before last save as we have to handle last batch diffrently
                     # zip_longest in read_lines adds extra empty lines up to batch size and we need to remove them
                     # but only for last batch - no need to do that for every batch
-                    assert len(rows) == 10000
                     read += len(rows)
                     if read >= amount:
+                        rows = rows[:amount-read+len(rows)]
                         break
+                    assert len(rows) == 10000
 
                     # We are going to process vocab in two threads - a bit faster than one and we need shared memory
                     # Also multiprocessing is slower here
