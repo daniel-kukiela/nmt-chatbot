@@ -166,38 +166,34 @@ inference_object = None
 inference_helper = start_inference
 
 # Main inference function
+#       Rating System:
+#       invalid - contains invalid character <unk>
+#       blacklist - contains blacklisted exp.
+#       url_complete - complete URL (eg. http://youtube.com/sentdex )
+#       url_incomplete - incomplete URL ( eg. http://www.youtube.com )
+#       no_punctuation - doesn't end with punctuation ( . or ! or ? )
+#       big_repeat - more than or equal to 4 kinds of repetitions
+#       small_repeat - less than 4 kinds of repetition(s)
+#       similar_to_question - answer similar to question
+#       finished_thought - non repeating non similar response ending with punctuation
+#       unknown_condition - satisfies none of the above criteria
+#
+
+
 def inference(question, include_blacklisted = True):
     answers = inference_helper(question)
     answers = detokenize(answers)
     answers = replace_in_answers(answers, 'answers')
     answers_rate = score_answers(answers, 'answers')
 
-    try:
-        index = answers_rate.index(1)
-        score = 1
-    except:
-        index = None
-
-    if index is None and include_blacklisted:
-        try:
-            index = answers_rate.index(0)
-            score = 0
-        except:
-            index = 0
-            score = -1
-
-    if index is None:
-        index = 0
-        score = -1
-
-    return {'answers': answers, 'index': index, 'score': score}
+    return {'answers': answers, 'answers_rating': answers_rate}
 
 # Internal inference function (for direct call)
 def inference_internal(question):
     answers = inference_helper(question)
     answers = detokenize(answers)
     answers = replace_in_answers(answers, 'answers')
-    answers_rate = score_answers(answers, 'answers')
+    answers_rate = score_answers(question,answers, 'answers')
     return (answers, answers_rate)
 
 # interactive mode
@@ -211,5 +207,5 @@ if __name__ == "__main__":
         question = input("\n> ")
         answers, answers_rate = inference_internal(question)
         for i, _ in enumerate(answers):
-            print("{}- {}{}".format(colorama.Fore.GREEN if answers_rate[i] == 1 else colorama.Fore.YELLOW if answers_rate[i] == 0 else colorama.Fore.RED, answers[i], colorama.Fore.RESET))
+            print("{}- {}{}".format(colorama.Fore.GREEN if answers_rate[i] == 'finished_thought' else colorama.Fore.BLUE if answers_rate[i] == 'url_complete' else colorama.Fore.YELLOW if answers_rate[i] == 'blacklist' or answers_rate[i] == 'url_incomplete' or answers_rate[i] == 'no_punctuation' or answers_rate[i] == 'small_repeat' else colorama.Fore.RED, answers[i], colorama.Fore.RESET))
 

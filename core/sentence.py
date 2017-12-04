@@ -1,6 +1,6 @@
 import re
 from setup.settings import preprocessing
-
+from urllib.parse import urlparse
 
 # List with regex-based blacklisted phrases
 answers_blacklist = None
@@ -12,20 +12,79 @@ with open(preprocessing['answers_blacklist_file'], 'r', encoding='utf-8') as ans
 with open(preprocessing['vocab_blacklist_file'], 'r', encoding='utf-8') as vocab_blacklist_file:
     vocab_blacklist = list(filter(lambda word: False if word[0] == '#' else True, filter(None, vocab_blacklist_file.read().split("\n"))))
 
+# Check for URL
+def is_complete_url(answer,complete = True):
+    if '\n' in answer:
+        return False
+    parsed = urlparse(answer)
+    if parsed.path == answer:
+        return False
+    elif not parsed.netloc:
+        return False
+    elif complete and not parsed.path :
+        return False
+    return True
+
+# Check for repetition in question/answer or in answer itself
+def check_repetition(answer, threshhold=2, question=None):
+    answer = answer.split(' ')
+    if not question:
+        question = answer
+    else:
+        question = question.split(' ')
+
+    size_max = max(len(answer), len(question))
+    size_min = 2
+    repetition_freq = 0
+    if len(answer) < 4 or len(question) < 4:
+        threshhold = 1
+        size_min = 1
+
+    for size in range(size_min, int(size_max / 2) + 1):
+        for pos1 in range(len(answer) - size + 1):
+            if question is answer:
+                for pos2 in range(pos1 + size, len(question) - size + 1):
+
+                    if answer[pos1:pos1 + size] == question[pos2:pos2 + size] and size >= threshhold:
+                        repetition_freq += 1
+            else:
+                for pos2 in range(0, len(question) - size + 1):
+
+                    if answer[pos1:pos1 + size] == question[pos2:pos2 + size] and size >= threshhold:
+                        repetition_freq += 1
+
+    return repetition_freq
+
+
 # Returns index of best answer, 0 if not found
-def score_answers(answers, name):
+def score_answers(question,answers, name):
 
     answers_rate = []
 
     # Rate each answer
     for answer in answers:
         if re.search('<unk>', answer):
-            answers_rate.append(-1)
+            answers_rate.append('invalid')
         elif any(re.search(regex, answer) for regex in eval(name + '_blacklist')):
-            answers_rate.append(0)
+            answers_rate.append('blacklist')
+        elif is_complete_url(answer):
+            answers_rate.append('url_complete')
+        elif is_complete_url(answer,complete=False):
+            answers_rate.append('url_incomplete')
+        elif check_repetition(answer) is not 0:
+            freq = check_repetition(answer)
+            if freq > 3:
+                answers_rate.append('big_repeat')
+            else:
+                answers_rate.append('small_repeat')
+        elif check_repetition(answer,question=question) is not 0:
+            answers_rate.append('similar_to_question')
+        elif answer[-1] != '.' or '!' or '?':
+            answers_rate.append('no_punctuation')
+        elif answer[-1] == '.' or '!' or '?':
+            answers_rate.append('finished_thought')
         else:
-            answers_rate.append(1)
-
+            answers_rate.append('unknown_condition')
     return answers_rate
 
 # List with regex-based replace phrases
@@ -46,9 +105,12 @@ def replace_in_answers(answers, name):
     # For every answer
     for answer in answers:
 
+        # replace newlinechar
+        if 'newlinechar' in answer:
+            answer = answer.replace('newlinechar', '\n')
+
         # And every regex rule
         for replace in eval(name + '_replace'):
-
             diffrence = 0
             replace = replace.split('##->##')
             replace_from = replace[0].strip()
