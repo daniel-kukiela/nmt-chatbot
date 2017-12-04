@@ -21,7 +21,7 @@ def is_complete_url(answer,complete = True):
         return False
     elif not parsed.netloc:
         return False
-    elif complete and not parsed.path :
+    elif complete and not parsed.path[:-1] :
         return False
     return True
 
