@@ -72,12 +72,7 @@ def do_start_inference(out_dir, hparams):
     return (infer_model, flags, hparams)
 
 # Inference
-def do_inference(phrase, infer_model, flags, hparams):
-
-    if not isinstance(phrase, list):
-        infer_data = [phrase]
-    else:
-        infer_data = phrase
+def do_inference(infer_data, infer_model, flags, hparams):
 
     # Disable TF logs for a while
     # Workaround for bug: https://github.com/tensorflow/tensorflow/issues/12414
@@ -181,23 +176,23 @@ inference_object = None
 inference_helper = start_inference
 
 # Main inference function
-def inference(question, include_blacklisted = True):
-    answers = inference_helper(tokenize(question))[0]
-    answers = detokenize(answers)
-    answers = replace_in_answers(answers, 'answers')
-    answers_score = score_answers(answers, 'answers')
+def inference(questions, include_blacklisted = True):
 
-    best_index, best_score = get_best_score(answers_score, include_blacklisted)
+    # Process questions
+    answers_list = process_questions(questions, include_blacklisted)
 
-    return {'answers': answers, 'scores': answers_score, 'best_index': best_index, 'best_score': best_score}
+    # Return (one or more?)
+    if len(answers_list) == 1:
+        return answers_list[0]
+    else:
+        return answers_list
 
 # Internal inference function (for direct call)
-def inference_internal(question):
-    answers = inference_helper(tokenize(question))[0]
-    answers = detokenize(answers)
-    answers = replace_in_answers(answers, 'answers')
-    answers_score = score_answers(answers, 'answers')
-    return (answers, answers_score)
+def inference_internal(questions):
+
+    # Process questions and return
+    return process_questions(questions)
+
 
 # Get index and score for best answer
 def get_best_score(answers_score, include_blacklisted = True):
@@ -222,6 +217,36 @@ def get_best_score(answers_score, include_blacklisted = True):
 
     return (index, score)
 
+# Process question or list of questions
+def process_questions(questions, include_blacklisted = True):
+
+    # Make a list
+    if not isinstance(questions, list):
+        questions = [questions]
+
+    # Clean and tokenize
+    prepared_questions = []
+    for question in questions:
+        question = question.strip()
+        prepared_questions.append(tokenize(question) if question else '##emptyquestion##')
+
+    # Run inference
+    answers_list = inference_helper(prepared_questions)
+
+    # Process answers
+    prepared_answers_list = []
+    for index, answers in enumerate(answers_list):
+        answers = detokenize(answers)
+        answers = replace_in_answers(answers, 'answers')
+        answers_score = score_answers(answers, 'answers')
+        best_index, best_score = get_best_score(answers_score, include_blacklisted)
+
+        if prepared_questions[index] == '##emptyquestion##':
+            prepared_answers_list.append(None)
+        else:
+            prepared_answers_list.append({'answers': answers, 'scores': answers_score, 'best_index': best_index, 'best_score': best_score})
+
+    return prepared_answers_list
 
 # interactive mode
 if __name__ == "__main__":
@@ -229,28 +254,13 @@ if __name__ == "__main__":
     # Input file
     if sys.stdin.isatty() == False:
 
-        # Prepare list of questions
-        questions = []
-        for line in sys.stdin.readlines():
-            line = line.strip()
-            if line:
-                questions.append(tokenize(line))
+        # Process questions
+        answers_list = process_questions(sys.stdin.readlines())
 
-        # If list is not empty - process it
-        if questions:
+        # Print answers
+        for answers in answers_list:
+            print(answers['answers'][answers['best_index']])
 
-            # Run inference
-            answers_list = inference_helper(questions)
-
-            # Process answers
-            for answers in answers_list:
-                answers = detokenize(answers)
-                answers = replace_in_answers(answers, 'answers')
-                answers_score = score_answers(answers, 'answers')
-
-                best_index, best_score = get_best_score(answers_score)
-
-                print(answers[best_index])
         sys.exit()
 
     # Interactive mode
@@ -260,7 +270,10 @@ if __name__ == "__main__":
     # QAs
     while True:
         question = input("\n> ")
-        answers, answers_score = inference_internal(question)
-        for i, _ in enumerate(answers):
-            print("{}- {}{}".format(colorama.Fore.GREEN if answers_score[i] == 1 else colorama.Fore.YELLOW if answers_score[i] == 0 else colorama.Fore.RED, answers[i], colorama.Fore.RESET))
+        answers = process_questions(question)[0]
+        if answers is None:
+            print(colorama.Fore.RED + "! Question can't be empty")
+        else:
+            for i, _ in enumerate(answers['scores']):
+                print("{}- {}{}".format(colorama.Fore.GREEN if answers['scores'][i] == 1 else colorama.Fore.YELLOW if answers['scores'][i] == 0 else colorama.Fore.RED, answers['answers'][i], colorama.Fore.RESET))
 

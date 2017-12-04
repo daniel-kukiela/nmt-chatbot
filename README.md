@@ -130,17 +130,22 @@ inference() takes two parameters:
  - question (required)
  - include_blacklisted = True (optional)
 
-Function will return dictionary containing:
+For a single question, function will return dictionary containing:
 
- - answers - all answers
- - index - index of best answer
- - score - -1, 0 or 1
+ - answers - list of all answers
+ - scores - list of scores for answers
+ - best_index - index of best answer
+ - best_score - score of best answer (-1, 0 or 1)
 
 Score:
 
  - -1 - inproper response - includes `<unk>`
  - 0 - proper response but blacklisted
  - 1 - proper response - passed checks
+
+With list of questions function will return list of dictionaries.
+
+For every empty question function will return None instead of result dictionary.
 
 With include_blacklisted set to false funtion will return either -1 or 1 for the score (and related to that score index)
 
