@@ -145,9 +145,9 @@ Score:
 
 With list of questions function will return list of dictionaries.
 
-For every empty question function will return None instead of result dictionary.
+For every empty question function will return `None` instead of result dictionary.
 
-With include_blacklisted set to false funtion will return either -1 or 1 for the score (and related to that score index)
+With `include_blacklisted` set to false funtion will return either -1 or 1 for the score (and related to that score index)
 
 
 ----------
