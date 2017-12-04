@@ -90,7 +90,15 @@ tests = [
     ['o 7', 'o7'],
     ['No 7', 'No 7'],
     ['o 7.', 'o7.'],
-    ['/ r / me_irl', '/r/me_irl']
+    ['/ r / me_irl', '/r/me_irl'],
+    ['Thank you ! : )', 'Thank you! :)'],
+    ['Thank you : )', 'Thank you :)'],
+    ['test Thanks : )', 'test Thanks :)'],
+    ['m 8', 'm8'],
+    ['com 8', 'com 8'],
+    ['m 82', 'm 82'],
+    ['/ r / subreddit', '/r/subreddit'],
+    ['test / r / subreddit test', 'test /r/subreddit test'],
 ]
 
 init()
