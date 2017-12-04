@@ -74,7 +74,10 @@ def do_start_inference(out_dir, hparams):
 # Inference
 def do_inference(phrase, infer_model, flags, hparams):
 
-    infer_data = [phrase]
+    if not isinstance(phrase, list):
+        infer_data = [phrase]
+    else:
+        infer_data = phrase
 
     # Disable TF logs for a while
     # Workaround for bug: https://github.com/tensorflow/tensorflow/issues/12414
@@ -103,38 +106,50 @@ def do_inference(phrase, infer_model, flags, hparams):
 
         # calculate number of translations to be returned
         num_translations_per_input = max(min(hparams.num_translations_per_input, hparams.beam_width), 1)
-        translations = []
 
-        try:
-            nmt_outputs, _ = loaded_infer_model.decode(sess)
-            if hparams.beam_width == 0:
-                nmt_outputs = nmt.inference.nmt_model.np.expand_dims(nmt_outputs, 0)
+        answers = []
+        while True:
+            try:
 
-            # Iterate through responses
-            for beam_id in range(num_translations_per_input):
+                nmt_outputs, _ = loaded_infer_model.decode(sess)
 
-                if hparams.eos: tgt_eos = hparams.eos.encode("utf-8")
+                if hparams.beam_width == 0:
+                    nmt_outputs = nmt.inference.nmt_model.np.expand_dims(nmt_outputs, 0)
 
-                # Select a sentence
-                output = nmt_outputs[beam_id][0, :].tolist()
+                batch_size = nmt_outputs.shape[1]
 
-                # If there is an eos symbol in outputs, cut them at that point
-                if tgt_eos and tgt_eos in output:
-                    output = output[:output.index(tgt_eos)]
+                for sent_id in range(batch_size):
 
-                # Format response
-                if hparams.subword_option == "bpe":  # BPE
-                    translation = nmt.utils.format_bpe_text(output)
-                elif hparams.subword_option == "spm":  # SPM
-                    translation = nmt.utils.format_spm_text(output)
-                else:
-                    translation = nmt.utils.format_text(output)
+                    # Iterate through responses
+                    translations = []
+                    for beam_id in range(num_translations_per_input):
 
-                # Add response to array
-                translations.append(translation.decode('utf-8'))
+                        if hparams.eos: tgt_eos = hparams.eos.encode("utf-8")
 
-        except tf.errors.OutOfRangeError:
-            pass
+                        # Select a sentence
+                        output = nmt_outputs[beam_id][sent_id, :].tolist()
+
+                        # If there is an eos symbol in outputs, cut them at that point
+                        if tgt_eos and tgt_eos in output:
+                            output = output[:output.index(tgt_eos)]
+                        print(output)
+
+                        # Format response
+                        if hparams.subword_option == "bpe":  # BPE
+                            translation = nmt.utils.format_bpe_text(output)
+                        elif hparams.subword_option == "spm":  # SPM
+                            translation = nmt.utils.format_spm_text(output)
+                        else:
+                            translation = nmt.utils.format_text(output)
+
+                        # Add response to the list
+                        translations.append(translation.decode('utf-8'))
+
+                    answers.append(translations)
+
+            except tf.errors.OutOfRangeError:
+                print("end")
+                break
 
         # bug workaround end
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
@@ -142,7 +157,7 @@ def do_inference(phrase, infer_model, flags, hparams):
         sys.stdout = current_stdout
         current_stdout = None
 
-        return translations
+        return answers
 
 # Fancy way to start everything on first inference() call
 def start_inference(question):
@@ -154,7 +169,7 @@ def start_inference(question):
 
     # First inference() call calls that method
     # Now we have everything running, so replace inference() with actual function call
-    inference_helper = lambda question: do_inference(tokenize(question), *inference_object)
+    inference_helper = lambda question: do_inference(question, *inference_object)
 
     # Rerun inference() call
     return inference_helper(question)
@@ -167,20 +182,35 @@ inference_helper = start_inference
 
 # Main inference function
 def inference(question, include_blacklisted = True):
-    answers = inference_helper(question)
+    answers = inference_helper(tokenize(question))[0]
     answers = detokenize(answers)
     answers = replace_in_answers(answers, 'answers')
-    answers_rate = score_answers(answers, 'answers')
+    answers_score = score_answers(answers, 'answers')
+
+    best_index, best_score = get_best_score(answers_score, include_blacklisted)
+
+    return {'answers': answers, 'scores': answers_score, 'best_index': best_index, 'best_score': best_score}
+
+# Internal inference function (for direct call)
+def inference_internal(question):
+    answers = inference_helper(tokenize(question))[0]
+    answers = detokenize(answers)
+    answers = replace_in_answers(answers, 'answers')
+    answers_score = score_answers(answers, 'answers')
+    return (answers, answers_score)
+
+# Get index and score for best answer
+def get_best_score(answers_score, include_blacklisted = True):
 
     try:
-        index = answers_rate.index(1)
+        index = answers_score.index(1)
         score = 1
     except:
         index = None
 
     if index is None and include_blacklisted:
         try:
-            index = answers_rate.index(0)
+            index = answers_score.index(0)
             score = 0
         except:
             index = 0
@@ -190,26 +220,47 @@ def inference(question, include_blacklisted = True):
         index = 0
         score = -1
 
-    return {'answers': answers, 'index': index, 'score': score}
+    return (index, score)
 
-# Internal inference function (for direct call)
-def inference_internal(question):
-    answers = inference_helper(question)
-    answers = detokenize(answers)
-    answers = replace_in_answers(answers, 'answers')
-    answers_rate = score_answers(answers, 'answers')
-    return (answers, answers_rate)
 
 # interactive mode
 if __name__ == "__main__":
 
+    # Input file
+    if sys.stdin.isatty() == False:
+
+        # Prepare list of questions
+        questions = []
+        for line in sys.stdin.readlines():
+            line = line.strip()
+            if line:
+                questions.append(tokenize(line))
+
+        # If list is not empty - process it
+        if questions:
+
+            # Run inference
+            answers_list = inference_helper(questions)
+
+            # Process answers
+            for answers in answers_list:
+                answers = detokenize(answers)
+                answers = replace_in_answers(answers, 'answers')
+                answers_score = score_answers(answers, 'answers')
+
+                best_index, best_score = get_best_score(answers_score)
+
+                print(answers[best_index])
+        sys.exit()
+
+    # Interactive mode
     print("\n\nStarting interactive mode (first response will take a while):")
     colorama.init()
 
     # QAs
     while True:
         question = input("\n> ")
-        answers, answers_rate = inference_internal(question)
+        answers, answers_score = inference_internal(question)
         for i, _ in enumerate(answers):
-            print("{}- {}{}".format(colorama.Fore.GREEN if answers_rate[i] == 1 else colorama.Fore.YELLOW if answers_rate[i] == 0 else colorama.Fore.RED, answers[i], colorama.Fore.RESET))
+            print("{}- {}{}".format(colorama.Fore.GREEN if answers_score[i] == 1 else colorama.Fore.YELLOW if answers_score[i] == 0 else colorama.Fore.RED, answers[i], colorama.Fore.RESET))
 

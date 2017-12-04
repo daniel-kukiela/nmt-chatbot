@@ -108,12 +108,18 @@ Steps from the question to the answers:
  4. Score responses with -1 (includes `<unk>`, 0 (matches agains at least one rule in setup/answers_blacklist.txt file) or 1 (passes all checks)
  5. Return (show with interactive mode) responses
 
+It is also possible to process batch of the questions by simply using command redirection:
 
+    python inference.py < input_file
+
+or:
+
+    python inference.py < input_file > output_file
 
 Importing nmt-chatbot
 -------------
 
-Project allows to be imported for the needs of inference. Simply embed folder within your project and import, tehn use:
+Project allows to be imported for the needs of inference. Simply embed folder within your project and import, then use:
 
     from nmt-chatbot.inference import inference
 
