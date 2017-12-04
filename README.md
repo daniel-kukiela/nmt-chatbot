@@ -23,7 +23,7 @@ It is *highly* recommended that you use Python 3.6+. Python 3.4 and 3.5 is likel
  2. ```$ cd nmt-chatbot```
  3. ```$ pip install -r requirements.txt```
  4. ```$ cd setup```
- 5. (optional) edit settings.py to your liking. These are a decent starting point for ~4gb of VRAM, you should first start by trying to raise vocab if you can. 
+ 5. (optional) edit settings.py to your liking. These are a decent starting point for ~4GB of VRAM, you should first start by trying to raise vocab if you can. 
  6. (optional) Edit text files containing rules in setup directory
  7. Place training data inside "new_data" folder (train.(from|to), tst2012.(from|to)m tst2013(from|to)). We have provided some sample data for those who just want to do a quick test drive. 
  8. ```$ python prepare_data.py``` ...Run setup/prepare_data.py - new folder called "data" will be created with prepared training data
