@@ -127,8 +127,8 @@ Project allows to be imported for the needs of inference. Simply embed folder wi
 
 inference() takes two parameters:
 
- - question (required)
- - include_blacklisted = True (optional)
+ - `question` (required)
+ - `include_blacklisted = True` (optional)
 
 For a single question, function will return dictionary containing:
 
