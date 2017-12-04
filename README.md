@@ -123,7 +123,7 @@ Project allows to be imported for the needs of inference. Simply embed folder wi
 
     from nmt-chatbot.inference import inference
 
-    print(inference("Hello!))
+    print(inference("Hello!"))
 
 inference() takes two parameters:
 
