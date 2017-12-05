@@ -65,6 +65,7 @@ hparams = {
     'num_train_steps': 500000,
     'num_layers': 2,
     'num_units': 512,
+    'batch_size': 128,
 #    'override_loaded_hparams': True,
 #    'decay_factor': 0.99998,
 #    'decay_steps': 1,
@@ -76,4 +77,5 @@ hparams = {
     'beam_width': 10,
     'length_penalty_weight': 1.0,
     'num_translations_per_input': 10
+    
 }
