@@ -4,7 +4,7 @@ sys.path.insert(0, '../')
 import os
 import errno
 from collections import Counter
-from setup.settings import preprocessing
+from setup.settings import preprocessing, hparams
 from core.tokenizer import tokenize
 from core.sentence import score_answers, replace_in_answers
 from tqdm import tqdm
@@ -32,9 +32,17 @@ def prepare():
 
     print("\nPreparing training set from raw set")
 
-    # Ensure that destination folder exists
+    # Ensure that train folder exists
     try:
         os.makedirs(preprocessing['train_folder'])
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
+    # Ensure that model/log folder exists
+    train_log_dir = os.path.join(hparams['out_dir'], 'train_log')
+    try:
+        os.makedirs(train_log_dir)
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
@@ -135,6 +143,18 @@ def prepare():
             with open('{}/{}'.format(preprocessing['train_folder'], file_name.replace('train', 'vocab_unused')), 'w',
                       encoding='utf-8', buffering=131072) as vocab_file:
                 vocab_file.write("\n".join(vocab[preprocessing['vocab_size']:]))
+
+            # Write metadata for embeddings
+            with open('{}/{}'.format(os.path.join(train_log_dir), 'decoder.tsv' if file_name == 'train.to' else 'encoder.tsv'), 'w',
+                      encoding='utf-8', buffering=131072) as metadata_file:
+                metadata_file.write("<unk>\n<s>\n</s>\n" + "\n".join(vocab[:preprocessing['vocab_size']]))
+
+    # Write pbtxt file for metadata for embeddings
+    with open('{}/{}'.format(os.path.join(train_log_dir), 'projector_config.pbtxt'), 'w',
+              encoding='utf-8', buffering=131072) as pbtxt_file:
+        pbtxt_file.write('''embeddings {\n    tensor_name: 'embeddings/decoder/embedding_decoder'\n    '''+
+                         '''metadata_path: 'decoder.tsv'\n}\nembeddings {\n    '''+
+                         '''tensor_name: 'embeddings/encoder/embedding_encoder'\n    metadata_path: 'encoder.tsv'\n}''')
 
 
 # Helper function, reads 'amount' number of lines from file handler
