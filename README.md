@@ -21,7 +21,7 @@ It is *highly* recommended that you use Python 3.6+. Python 3.4 and 3.5 is likel
 
  1. ```$ git clone --recursive https://github.com/daniel-kukiela/nmt-chatbot```
  2. ```$ cd nmt-chatbot```
- 3. ```$ pip install -r requirements.txt```
+ 3. ```$ pip install -r requirements.txt``` Tensorflow-gpu is one of the requirements. You also need CUDA Toolkit 8.0 and cuDNN 6.1. (Windows tutorial: https://www.youtube.com/watch?v=r7-WPbx8VuY  Linux tutorial: https://pythonprogramming.net/how-to-cuda-gpu-tensorflow-deep-learning-tutorial/)
  4. ```$ cd setup```
  5. (optional) edit settings.py to your liking. These are a decent starting point for ~4GB of VRAM, you should first start by trying to raise vocab if you can. 
  6. (optional) Edit text files containing rules in setup directory
