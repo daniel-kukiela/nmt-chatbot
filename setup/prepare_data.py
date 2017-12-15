@@ -1,26 +1,25 @@
 import sys
-
 sys.path.insert(0, '../')
 import os
 import errno
 from collections import Counter
 from setup.settings import preprocessing, hparams
 from core.tokenizer import tokenize
-from core.sentence import score_answers, replace_in_answers
+from core.sentence import replace_in_answers
 from tqdm import tqdm
 from itertools import zip_longest
 from multiprocessing import Pool
 from threading import Thread
-import time
+
 
 # Files to be prepared
 files = {
-    'train.from': {'amount': 1, 'up_to': -1},  # copy all of data (up to "samples")
-    'tst2012.from': {'amount': .1, 'up_to': preprocessing['test_size']},  # copy 1/10th but up to 'test_size'
-    'tst2013.from': {'amount': .1, 'up_to': preprocessing['test_size']},
-    'train.to': {'amount': 1, 'up_to': -1},
-    'tst2012.to': {'amount': .1, 'up_to': preprocessing['test_size']},
-    'tst2013.to': {'amount': .1, 'up_to': preprocessing['test_size']},
+    '{}.{}'.format(hparams['train_prefix'], hparams['src']).replace(preprocessing['train_folder'], ''): {'amount': 1,  'up_to': -1},  # copy all of data (up to "samples")
+    '{}.{}'.format(hparams['dev_prefix'],   hparams['src']).replace(preprocessing['train_folder'], ''): {'amount': .1, 'up_to': preprocessing['test_size']},  # copy 1/10th but up to 'test_size'
+    '{}.{}'.format(hparams['test_prefix'],  hparams['src']).replace(preprocessing['train_folder'], ''): {'amount': .1, 'up_to': preprocessing['test_size']},
+    '{}.{}'.format(hparams['train_prefix'], hparams['tgt']).replace(preprocessing['train_folder'], ''): {'amount': 1,  'up_to': -1},
+    '{}.{}'.format(hparams['dev_prefix'],   hparams['tgt']).replace(preprocessing['train_folder'], ''): {'amount': .1, 'up_to': preprocessing['test_size']},
+    '{}.{}'.format(hparams['test_prefix'],  hparams['tgt']).replace(preprocessing['train_folder'], ''): {'amount': .1, 'up_to': preprocessing['test_size']},
 }
 
 vocab = Counter([])
@@ -52,11 +51,10 @@ def prepare():
 
         vocab = Counter([])
 
-        print("\nFile: {} (iteration = 10k lines)".format(file_name))
+        print("\nFile: {} (iteration = 10k lines)".format(file_name.lstrip('\\/')))
 
         # Output file handler
-        out_file = open('{}/{}'.format(preprocessing['train_folder'], file_name), 'w', encoding='utf-8',
-                        buffering=131072)
+        out_file = open('{}{}'.format(preprocessing['train_folder'], file_name), 'w', encoding='utf-8', buffering=131072)
 
         # Maximum number of lines
         read = 0
@@ -72,8 +70,7 @@ def prepare():
         with Pool(processes=preprocessing['cpu_count']) as pool:
 
             # Open input file
-            with open('{}/{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8',
-                      buffering=131072) as in_file:
+            with open('{}{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072) as in_file:
 
                 # Iterate every 10k lines
                 for rows in tqdm(read_lines(in_file, 10000, '')):
@@ -124,7 +121,7 @@ def prepare():
 
         # If it's train file, make vocab
         if file_name == 'train.from' or file_name == 'train.to':
-            print("\nFile: {} (saving vocab)".format(file_name.replace('train', 'vocab')))
+            print("\nFile: {} (saving vocab)".format(file_name.replace('train', 'vocab').lstrip('\\/')))
 
             # Get most common entities
             vocab = [entity for entity, v in vocab.most_common()]
@@ -137,21 +134,17 @@ def prepare():
             vocab = [entity for entity in new_vocab if not (entity in vocab or vocab.add(entity)) and entity]
 
             # Write entities to a file
-            with open('{}/{}'.format(preprocessing['train_folder'], file_name.replace('train', 'vocab')), 'w',
-                      encoding='utf-8', buffering=131072) as vocab_file:
+            with open('{}{}'.format(preprocessing['train_folder'], file_name.replace('train', 'vocab')), 'w', encoding='utf-8', buffering=131072) as vocab_file:
                 vocab_file.write("<unk>\n<s>\n</s>\n" + "\n".join(vocab[:preprocessing['vocab_size']]))
-            with open('{}/{}'.format(preprocessing['train_folder'], file_name.replace('train', 'vocab_unused')), 'w',
-                      encoding='utf-8', buffering=131072) as vocab_file:
+            with open('{}{}'.format(preprocessing['train_folder'], file_name.replace('train', 'vocab_unused')), 'w', encoding='utf-8', buffering=131072) as vocab_file:
                 vocab_file.write("\n".join(vocab[preprocessing['vocab_size']:]))
 
             # Write metadata for embeddings
-            with open('{}/{}'.format(os.path.join(train_log_dir), 'decoder.tsv' if file_name == 'train.to' else 'encoder.tsv'), 'w',
-                      encoding='utf-8', buffering=131072) as metadata_file:
+            with open('{}{}'.format(os.path.join(train_log_dir), 'decoder.tsv' if file_name == 'train.to' else 'encoder.tsv'), 'w', encoding='utf-8', buffering=131072) as metadata_file:
                 metadata_file.write("<unk>\n<s>\n</s>\n" + "\n".join(vocab[:preprocessing['vocab_size']]))
 
     # Write pbtxt file for metadata for embeddings
-    with open('{}/{}'.format(os.path.join(train_log_dir), 'projector_config.pbtxt'), 'w',
-              encoding='utf-8', buffering=131072) as pbtxt_file:
+    with open('{}{}'.format(os.path.join(train_log_dir), 'projector_config.pbtxt'), 'w', encoding='utf-8', buffering=131072) as pbtxt_file:
         pbtxt_file.write('''embeddings {\n    tensor_name: 'embeddings/decoder/embedding_decoder'\n    '''+
                          '''metadata_path: 'decoder.tsv'\n}\nembeddings {\n    '''+
                          '''tensor_name: 'embeddings/encoder/embedding_encoder'\n    metadata_path: 'encoder.tsv'\n}''')
