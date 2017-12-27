@@ -86,16 +86,15 @@ hparams = {
     'num_units': 512,
 #    'batch_size': 128,
 #    'override_loaded_hparams': True,
-#    'decay_factor': 0.99998,
-#    'decay_steps': 1,
+#    'decay_scheme': 'luong234'
 #    'residual': True,
-#    'start_decay_step': 1,
     'optimizer': 'adam',
     'encoder_type': 'bi',
     'learning_rate':0.001,
     'beam_width': 20,
     'length_penalty_weight': 1.0,
     'num_translations_per_input': 20,
+#    'num_keep_ckpts': 5,
 
     ## You don't need to change anything below (internal settings)
     'src': 'from',
