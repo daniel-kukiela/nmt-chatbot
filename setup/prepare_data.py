@@ -156,7 +156,7 @@ def prepare():
             train_vocab[source] = Counter()
 
             # Build vocab for BPE learning purpose
-            print("Building temporary vocab ({})".format('common' if preprocessing['joined_vocab'] else source))
+            print("Building temporary vocab ({})".format(hparams['src'] if preprocessing['joined_vocab'] else source))
             for i, (entity, freq) in tqdm(enumerate(raw_vocab.most_common()), ascii=True, unit=' tokens'):
 
                 # Split vocab token
@@ -427,7 +427,7 @@ def prepare():
     # Joined vocab
     if preprocessing['joined_vocab']:
         vocab_files = [
-            '{}.{}'.format(hparams['train_prefix'].replace('train', 'vocab'), 'common').replace(preprocessing['train_folder'], '').lstrip('\\/'),
+            '{}.{}'.format(hparams['train_prefix'].replace('train', 'vocab'), hparams['src']).replace(preprocessing['train_folder'], '').lstrip('\\/'),
         ]
 
     # Separated vocabs
@@ -443,8 +443,6 @@ def prepare():
 
         # Get most common entities
         source = vocab_file_name.split('.')[-1]
-        if source == 'common':
-            source = hparams['src']
         data_vocab[source] = [entity for entity, _ in data_vocab[source].most_common()]
 
         # Write entities to a file

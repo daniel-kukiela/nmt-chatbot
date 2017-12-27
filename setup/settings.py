@@ -120,3 +120,6 @@ if preprocessing['use_bpe']:
     hparams['train_prefix'] += '.bpe'
     hparams['dev_prefix'] += '.bpe'
     hparams['test_prefix'] += '.bpe'
+
+if preprocessing['joined_vocab']:
+    hparams['share_vocab'] = True
