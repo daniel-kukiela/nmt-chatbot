@@ -11,7 +11,7 @@ with open(preprocessing['answers_blacklist_file'], 'r', encoding='utf-8') as ans
     answers_blacklist = list(filter(lambda word: False if word[0] == '#' else True, filter(None, answers_blacklist_file.read().split("\n"))))
 
 # Returns index of best answer, 0 if not found
-def score_answers(answers, name):
+def score_answers(answers):
 
     answers_rate = []
 
