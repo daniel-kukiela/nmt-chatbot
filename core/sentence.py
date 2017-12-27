@@ -9,8 +9,6 @@ vocab_blacklist = None
 # Load blacklisted answers
 with open(preprocessing['answers_blacklist_file'], 'r', encoding='utf-8') as answers_blacklist_file:
     answers_blacklist = list(filter(lambda word: False if word[0] == '#' else True, filter(None, answers_blacklist_file.read().split("\n"))))
-with open(preprocessing['vocab_blacklist_file'], 'r', encoding='utf-8') as vocab_blacklist_file:
-    vocab_blacklist = list(filter(lambda word: False if word[0] == '#' else True, filter(None, vocab_blacklist_file.read().split("\n"))))
 
 # Returns index of best answer, 0 if not found
 def score_answers(answers, name):
@@ -21,7 +19,7 @@ def score_answers(answers, name):
     for answer in answers:
         if re.search('<unk>', answer):
             answers_rate.append(-1)
-        elif any(re.search(regex, answer) for regex in eval(name + '_blacklist')):
+        elif any(re.search(regex, answer) for regex in eval('answers_blacklist')):
             answers_rate.append(0)
         else:
             answers_rate.append(1)
@@ -35,11 +33,9 @@ vocab_replace = None
 # Load blacklisted answers
 with open(preprocessing['answers_replace_file'], 'r', encoding='utf-8') as answers_replace_file:
     answers_replace = list(filter(lambda word: False if word[0] == '#' else True, filter(None, answers_replace_file.read().split("\n"))))
-with open(preprocessing['vocab_replace_file'], 'r', encoding='utf-8') as vocab_replace_file:
-    vocab_replace = list(filter(lambda word: False if word[0] == '#' else True, filter(None, vocab_replace_file.read().split("\n"))))
 
 # Replaces phrases in answers
-def replace_in_answers(answers, name):
+def replace_in_answers(answers):
 
     replaces_answers = []
 
@@ -47,7 +43,7 @@ def replace_in_answers(answers, name):
     for answer in answers:
 
         # And every regex rule
-        for replace in eval(name + '_replace'):
+        for replace in eval('answers_replace'):
 
             diffrence = 0
             replace = replace.split('##->##')

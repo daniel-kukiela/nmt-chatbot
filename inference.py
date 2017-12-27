@@ -3,10 +3,10 @@ import os
 sys.path.append(os.path.realpath(os.path.dirname(__file__)))
 sys.path.append(os.path.realpath(os.path.dirname(__file__)) + "/nmt")
 import argparse
-from setup.settings import hparams, out_dir
+from setup.settings import hparams, out_dir, preprocessing
 from nmt import nmt
 import tensorflow as tf
-from core.tokenizer import tokenize, detokenize
+from core.tokenizer import tokenize, detokenize, apply_bpe, apply_bpe_load
 from core.sentence import score_answers, replace_in_answers
 import colorama
 
@@ -166,6 +166,10 @@ def start_inference(question):
     # Now we have everything running, so replace inference() with actual function call
     inference_helper = lambda question: do_inference(question, *inference_object)
 
+    # Load BPE join pairs
+    if preprocessing['use_bpe']:
+        apply_bpe_load()
+
     # Rerun inference() call
     return inference_helper(question)
 
@@ -228,7 +232,7 @@ def process_questions(questions, include_blacklisted = True):
     prepared_questions = []
     for question in questions:
         question = question.strip()
-        prepared_questions.append(tokenize(question) if question else '##emptyquestion##')
+        prepared_questions.append(apply_bpe(tokenize(question)) if question else '##emptyquestion##')
 
     # Run inference
     answers_list = inference_helper(prepared_questions)
@@ -237,8 +241,8 @@ def process_questions(questions, include_blacklisted = True):
     prepared_answers_list = []
     for index, answers in enumerate(answers_list):
         answers = detokenize(answers)
-        answers = replace_in_answers(answers, 'answers')
-        answers_score = score_answers(answers, 'answers')
+        answers = replace_in_answers(answers)
+        answers_score = score_answers(answers)
         best_index, best_score = get_best_score(answers_score, include_blacklisted)
 
         if prepared_questions[index] == '##emptyquestion##':
