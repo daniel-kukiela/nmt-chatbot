@@ -112,6 +112,7 @@ hparams = {
 
 if preprocessing['use_bpe']:
     preprocessing['embedded_detokenizer'] = True
+    hparams['subword_option'] = 'spm'
 
 preprocessing['protected_phrases_file'] = preprocessing['protected_phrases_bpe_file'] if preprocessing['use_bpe'] else preprocessing['protected_phrases_standard_file']
 

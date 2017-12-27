@@ -162,7 +162,9 @@ def detokenize(answers):
 
     # Embedded detokenizer
     if preprocessing['use_bpe']:
-        return [answer.replace(' ', '').replace('▁', ' ') for answer in answers]
+        # return [answer.replace(' ', '').replace('▁', ' ') for answer in answers]
+        # Do nothing - sentence is already detokenized thanks to included SPM detokenizer in NMT enabled in setup/settings.py
+        return answers
 
     detokenized_answers = []
 
