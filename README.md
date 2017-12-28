@@ -5,11 +5,11 @@ nmt-chatbot
 Introduction
 -------------
 
-nmt-chatbot is the implementation of chatbot using NMT - Neural Machine Translation (seq2seq).
+nmt-chatbot is the implementation of chatbot using NMT - Neural Machine Translation (seq2seq). Includes BPE/WPM-like tokenizator (own implementation). Main purpose of that project is to make a NMT chatbot, but it's fully compatible with NMT and still can be used for sentence translations between two languages.
 
 Code is built on top of NMT but because of lack of available interfaces, some things are "hacked", and parts of the code had to be copied into that project (and will have to be mantained to follow changes in NMT).
 
-This project forks NMT. We had to make a change in code allowing use with stable version of TensorFlow (1.4). That allowed us also to fix a bug before official patch.
+This project forks NMT. We had to make a change in code allowing use with stable version of TensorFlow (1.4). That allowed us also to fix a bug before official patch as well as do couple of changes.
 
 
 
@@ -19,7 +19,11 @@ Setup
 Steps to setup project for your needs:
 It is *highly* recommended that you use Python 3.6+. Python 3.4 and 3.5 is likely to work in Linux, but you will eventually hit encoding errors with 3.5 or lower in a Windows environment.
 
- 1. ```$ git clone --recursive https://github.com/daniel-kukiela/nmt-chatbot```
+If you want to use exactly what's in tutorial made by Sentdex, use v0.1 tag. There are multiple changes after last part of tutorial.
+
+ 1. ```$ git clone --recursive https://github.com/daniel-kukiela/nmt-chatbot```  
+    (or)  
+    ```$ git clone --recursive https://github.com/daniel-kukiela/nmt-chatbot/tree/v0.1``` (for for version featured in Sentdex tutorial)
  2. ```$ cd nmt-chatbot```
  3. ```$ pip install -r requirements.txt``` Tensorflow-gpu is one of the requirements. You also need CUDA Toolkit 8.0 and cuDNN 6.1. (Windows tutorial: https://www.youtube.com/watch?v=r7-WPbx8VuY  Linux tutorial: https://pythonprogramming.net/how-to-cuda-gpu-tensorflow-deep-learning-tutorial/)
  4. ```$ cd setup```
@@ -32,17 +36,50 @@ It is *highly* recommended that you use Python 3.6+. Python 3.4 and 3.5 is likel
 
 
 
+Standard vs BPE/WPM-like (subword) tokenization, embedded detokenizer
+---------------------------------------------------------------------------------------
+
+v0.1 includes only standard (own, first version) tokenizer.
+
+Standard tokenizer is based on moses-smt one. It's highly modified own python implementation of that tokenizer. The adventage of tokenizer like that is lack of duplicates in vocab file (more on that later). Biggest disadventage - it needs bunch of regex-based rules for detokenization process and it's hard to write ones that covers all cases.
+
+Standard tokenizer splits sentences by space, period (and other grammar chars), speparates digits, etc.
+
+BPE/WPM-like (subword) tokenizer is based on subword-nmt one, but (like for "standard" one) it's highly modified to fit our needs and for speed. The biggest adventage is ability to fit any number of words (tokens) in much smaller vocab thanks to subwords.
+
+BPE/WPM-like (subword) tokenizer is doing similar splits like standard one, but in addition it splits every entity by char, counts most common pairs of chars (chars next to other chars in entities), and joins that pairs to make a vocab of desired number of tokens. As a result, most common words are joined back together, when the rarest ones will stay split into multiple pieces (subwords) shared with other words. That way near any number of vocab tokens can be lowered to number as small as couple of thousands (or lower - depending on training set). Basically it's something between char model and word model (as for model not beeing a char model, vocab size should be held as big as possible to include most common words in one piece as well ass some elemental tokens like single chars). Subword-based model should produce way less (to none) `<unk>` special tokens in output at the exchange for sentences with higher number of tokens (possibly shorter sentences outputted by network for purposes like chatbot).
+
+Standard vs. BPE/WPM-like (subword) tokenization examples:
+
+    > Aren ' t they streaming it for free online ... ?
+    > Aren ' t they streaming it for free online ... ?
+
+    > THE GREATEST FOOTBALL TEAM !
+    > THE GRE AT EST F OO TB ALL TEAM !
+
+    > Become a tourist , I hear lots of Kerbals go on vacation there ...
+    > B ec ome a tou rist , I hear lots of Ker b als go on vacation there ...
+
+Embeded detokenizer (option for standard tokenizer, forced to 'on' for BPE/WPM-like one - you can see why above) allows to do a perfect detokenization at the exchange for higher number of tokens in vocab - duplicate-like entities in vocab (variations with and without meta symbol '▁', where that meta symbol is all is needed for detokenization).
+Biggest adventage of that detokenizer is lack of any rules for detokenization. Detokenization is easy as doing two replaces in resulting sentence - first remove all spaces, then replace meta symbol '▁' with space character.
+
+Examples:
+
+    > ▁B ec ome ▁a ▁tou rist , ▁I ▁hear ▁lots ▁of ▁Ker b als ▁go ▁on ▁vacation ▁there ...
+    > ▁I ' d ▁w ager ▁it ' s ▁appropriate ▁for ▁all ▁kinds ▁of ▁things .
+
+
+
 Rules files
 -------------
 
 Setup folder contains multiple "rules" files (All of them are regex-based:
 
- - vocab_blacklist.txt - removes entities from vocab files
- - vocab_replace.txt - synonyms, replaces entity or it's part with replacement
  - answers_blacklist.txt - disallows answer from being returned (more on that later)
  - answers_detokenize.txt - detokenization rules (removes unneccessary spaces)
  - answers_replace - synonyms, replaces phrase or it's part with replacement
- - protected_phrases.txt - ensures that matching phrases will remain untouched when building vocab file
+ - protected_phrases_standard.txt - ensures that matching phrases will remain untouched when building vocab file with standard tokenizer
+ - protected_phrases_bpe.txt - same as above but for BPE/WPM-like tokenizer
 
 
 
