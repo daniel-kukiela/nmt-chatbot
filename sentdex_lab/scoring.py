@@ -51,19 +51,23 @@ def unk_checker(answer,score):
     
 
 def is_answer_identical(question, answer, score):
-    '''
-    if answer is the same, or very similar to the question, penalize.
-    '''
     try:
-        question = remove_punc(question)
-        answer = remove_punc(answer)
-            
-        if question == answer:
-            return score-4
-        if answer in question or question in answer:
-            return score-3
-        else:
-            return score
+        question = question.split(' ')
+        answer = answer.split(' ')
+        similarities = 0
+        for i in answer:
+            for j in question:
+                if i.lower() in j.lower() or j.lower() in i.lower():
+                    similarities += 1
+                    break
+        penalty = 0
+        if similarities > len(answer) / 1.8:
+            penalty = round((similarities / len(answer)) * 4, 1)
+        elif similarities > len(answer) / 2:
+            penalty = round((similarities / len(answer)) * 2.5, 1)
+        elif similarities > len(answer) / 4:
+            penalty = round((similarities / len(answer)) * 1.5, 1)
+        return score - penalty
     except Exception as e:
         print(str(e))
         return score
