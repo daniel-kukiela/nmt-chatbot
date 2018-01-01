@@ -160,7 +160,6 @@ def score_based_placement(idx, score):
 
 
 def do_scoring(question, answer, score):
-    score = is_answer_identical(question, answer, score)
     score = does_end_in_punctuation(answer,score)
     score = answer_echo(answer,score)
     score = answer_echo_question(question,answer,score)
@@ -168,6 +167,7 @@ def do_scoring(question, answer, score):
     score = unk_checker(answer,score)
     score = messedup_link(answer,score)
     score = bad_response(answer,score)
+    score = is_answer_identical(question, answer, score)
     return score
     
 
