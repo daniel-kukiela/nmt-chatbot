@@ -15,6 +15,17 @@ bad_responses = ["http://","https://","http://en.wikipedia.org/wiki/List_of_burn
 # emojie check is [-6]
 
 
+
+def tiny_response(answer,score):
+    '''
+    It is preferrable to have a proper sentence as a reponse then a single word or a pair.
+    '''
+    verbosity = len(answer.split(' '))
+    if verbosity <= 2:
+        score -= 2 - verbosity
+    return score    
+
+
 def bad_response(answer,score):
     for br in bad_responses:
         if answer == br:
@@ -164,10 +175,33 @@ def do_scoring(question, answer, score):
     score = unk_checker(answer,score)
     score = messedup_link(answer,score)
     score = bad_response(answer,score)
+    score = tiny_response(answer,score)
     return score
     
 
 
+def get_choice(wrapper):
+    for wrapped in wrapper:
+        score = do_scoring(wrapped["question"], wrapped["answer"], wrapped["score"])
+        ans_score[answer] = score
+        '''print(question)
+        print(answer)
+        print(score)
+        print()
+        print()'''
+
+    scores = [v for k,v in ans_score.items()]
+
+    max_score = max(scores)
+    #print('Highest score =',max_score)
+
+    options = [k for k,v in ans_score.items() if v == max_score]
+    #print(options)
+    return random.choice(options)
+
+            
+    
+    
 
 if __name__ == '__main__':
     name = 'full_some_questions-81k.out'
@@ -178,36 +212,15 @@ if __name__ == '__main__':
             batches = content.split(">>>")
 
             ans_score = {}
-            
+            wrapper = []
             for idx,batch in enumerate(batches[1:]):
                 #print(batch)
                 question, answer = batch.split('\n')[0], batch.split('\n')[1].split('::: ')[1]
                 score = float(batch.split('\n')[1].split(' ::: ')[0])
-
-
+                wrapped = {"question":question,"answer":answer,"score":score}
+                wrapper.append(wrapped)
                 #score = score_based_placement(idx, score)
-
-                score = do_scoring(question, answer, score)
-
-                
-                ans_score[answer] = score
-                
-                '''print(question)
-                print(answer)
-                print(score)
-                print()
-                print()'''
-
-            scores = [v for k,v in ans_score.items()]
-            
-            max_score = max(scores)
-            #print('Highest score =',max_score)
-
-            options = [k for k,v in ans_score.items() if v == max_score]
-            #print(options)
-
-            choice_answer = random.choice(options)
-
+            choice_answer = get_choice(wrapper)
             print(30*"_")
             print('> ',question)
             print(choice_answer)
