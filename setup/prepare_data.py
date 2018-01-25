@@ -58,7 +58,7 @@ def prepare():
         print("File: {}{}{}".format(colorama.Fore.GREEN, file_name, colorama.Fore.RESET))
 
         # Output file handler
-        out_file = open('{}\{}'.format(preprocessing['train_folder'], file_name), 'w', encoding='utf-8', buffering=131072)
+        out_file = open('{}/{}'.format(preprocessing['train_folder'], file_name), 'w', encoding='utf-8', buffering=131072)
 
         # Maximum number of lines
         read = 0
@@ -73,10 +73,10 @@ def prepare():
         with Pool(processes=preprocessing['cpu_count']) as pool:
 
             # Count number of lines in file
-            progress = tqdm(ascii=True, unit=' lines', total=min(amount, sum(1 for _ in open('{}\{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072))))
+            progress = tqdm(ascii=True, unit=' lines', total=min(amount, sum(1 for _ in open('{}/{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072))))
 
             # Open input file
-            with open('{}\{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072) as in_file:
+            with open('{}/{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072) as in_file:
 
                 last_batch = False
 
@@ -346,15 +346,15 @@ def prepare():
 
         # Save list of joins to a file (joined vocab) and replace main vocabs
         if preprocessing['joined_vocab']:
-            with open('{}\{}'.format(preprocessing['train_folder'], 'bpe_joins.common.json'), 'w', encoding='utf-8', buffering=131072) as bpe_file:
+            with open('{}/{}'.format(preprocessing['train_folder'], 'bpe_joins.common.json'), 'w', encoding='utf-8', buffering=131072) as bpe_file:
                 json.dump({json.dumps(k):v for k,v in joins[hparams['src']].items()}, bpe_file)
             data_vocab[hparams['src']] = train_vocab[hparams['src']]
 
         # Save list of joins to files (separated vocab)
         else:
-            with open('{}\{}'.format(preprocessing['train_folder'], 'bpe_joins.{}.json'.format(hparams['src'])), 'w', encoding='utf-8', buffering=131072) as bpe_file:
+            with open('{}/{}'.format(preprocessing['train_folder'], 'bpe_joins.{}.json'.format(hparams['src'])), 'w', encoding='utf-8', buffering=131072) as bpe_file:
                 json.dump({json.dumps(k):v for k,v in joins[hparams['src']].items()}, bpe_file)
-            with open('{}\{}'.format(preprocessing['train_folder'], 'bpe_joins.{}.json'.format(hparams['tgt'])), 'w', encoding='utf-8', buffering=131072) as bpe_file:
+            with open('{}/{}'.format(preprocessing['train_folder'], 'bpe_joins.{}.json'.format(hparams['tgt'])), 'w', encoding='utf-8', buffering=131072) as bpe_file:
                 json.dump({json.dumps(k):v for k,v in joins[hparams['tgt']].items()}, bpe_file)
             data_vocab[hparams['src']] = train_vocab[hparams['src']]
             data_vocab[hparams['tgt']] = train_vocab[hparams['tgt']]
@@ -380,7 +380,7 @@ def prepare():
             print("File: {}{}{}".format(colorama.Fore.GREEN, file_name, colorama.Fore.RESET))
 
             # Output file handler
-            out_file = open('{}\{}'.format(preprocessing['train_folder'], file_name), 'w', encoding='utf-8', buffering=131072)
+            out_file = open('{}/{}'.format(preprocessing['train_folder'], file_name), 'w', encoding='utf-8', buffering=131072)
 
             # Prepare thread variables
             write_thread = None
@@ -390,10 +390,10 @@ def prepare():
             with Pool(processes=preprocessing['cpu_count'], initializer=apply_bpe_init, initargs=(joins[source],)) as pool:
 
                 # Progress bar
-                progress = tqdm(ascii=True, unit=' lines', total=sum(1 for _ in open('{}\{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')), 'r', encoding='utf-8', buffering=131072)))
+                progress = tqdm(ascii=True, unit=' lines', total=sum(1 for _ in open('{}/{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')), 'r', encoding='utf-8', buffering=131072)))
 
                 # Open input file
-                with open('{}\{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')), 'r', encoding='utf-8', buffering=131072) as in_file:
+                with open('{}/{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')), 'r', encoding='utf-8', buffering=131072) as in_file:
 
                     # Iterate every 10k lines
                     for rows in read_lines(in_file, 10000, ''):
@@ -419,7 +419,7 @@ def prepare():
                     progress.close()
 
             # Remove unnecessary train file (BPE one will be used by NMT)
-            os.remove('{}\{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')))
+            os.remove('{}/{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')))
 
     print(colorama.Fore.GREEN + "\nPostprocessing and saving vocabs" + colorama.Fore.RESET)
 
@@ -446,20 +446,20 @@ def prepare():
         data_vocab[source] = [entity for entity, _ in data_vocab[source].most_common()]
 
         # Write entities to a file
-        with open('{}\{}'.format(preprocessing['train_folder'], vocab_file_name), 'w', encoding='utf-8', buffering=131072) as vocab_file:
+        with open('{}/{}'.format(preprocessing['train_folder'], vocab_file_name), 'w', encoding='utf-8', buffering=131072) as vocab_file:
             vocab_file.write("<unk>\n<s>\n</s>\n" + "\n".join(data_vocab[source][:preprocessing['vocab_size']]))
-        with open('{}\{}'.format(preprocessing['train_folder'], vocab_file_name.replace('vocab', 'vocab_unused')), 'w', encoding='utf-8', buffering=131072) as vocab_file:
+        with open('{}/{}'.format(preprocessing['train_folder'], vocab_file_name.replace('vocab', 'vocab_unused')), 'w', encoding='utf-8', buffering=131072) as vocab_file:
             vocab_file.write("\n".join(data_vocab[source][preprocessing['vocab_size']:]))
 
     print(colorama.Fore.GREEN + "\nWriting pbtxt file" + colorama.Fore.RESET)
 
     # Write pbtxt file for metadata for embeddings
-    with open('{}\{}'.format(os.path.join(train_log_dir), 'projector_config.pbtxt'), 'w', encoding='utf-8', buffering=131072) as pbtxt_file:
+    with open('{}/{}'.format(os.path.join(train_log_dir), 'projector_config.pbtxt'), 'w', encoding='utf-8', buffering=131072) as pbtxt_file:
         pbtxt_file.write(('''embeddings {{\n    tensor_name: 'embeddings/decoder/embedding_decoder'\n    '''+
                          '''metadata_path: '{}'\n}}\nembeddings {{\n    '''+
                          '''tensor_name: 'embeddings/encoder/embedding_encoder'\n    metadata_path: '{}'\n}}''').format(
-            '{}\{}'.format(preprocessing['train_folder'], vocab_files[0].replace('train', 'vocab')),
-            '{}\{}'.format(preprocessing['train_folder'], vocab_files[0 if preprocessing['joined_vocab'] else 1].replace('train', 'vocab'))
+            '{}/{}'.format(preprocessing['train_folder'], vocab_files[0].replace('train', 'vocab')),
+            '{}/{}'.format(preprocessing['train_folder'], vocab_files[0 if preprocessing['joined_vocab'] else 1].replace('train', 'vocab'))
         ))
 
     print(colorama.Fore.GREEN + "\nAll done" + colorama.Fore.RESET)
