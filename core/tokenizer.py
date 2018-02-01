@@ -235,7 +235,7 @@ def sentence_split(sentence):
 
 # Load json file with BPE join pairs
 def apply_bpe_load():
-    with open('{}\{}'.format(preprocessing['train_folder'], 'bpe_joins.{}.json'.format('common' if preprocessing['joined_vocab'] else 'from')), 'r', encoding='utf-8', buffering=131072) as bpe_file:
+    with open('{}/{}'.format(preprocessing['train_folder'], 'bpe_joins.{}.json'.format('common' if preprocessing['joined_vocab'] else 'from')), 'r', encoding='utf-8', buffering=131072) as bpe_file:
         joins = {tuple(json.loads(k)): v for k, v in json.load(bpe_file).items()}
 
     apply_bpe_init(joins)
