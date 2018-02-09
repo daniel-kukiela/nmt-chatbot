@@ -23,7 +23,7 @@ If you want to use exactly what's in tutorial made by Sentdex, use v0.1 tag. The
 
  1. ```$ git clone --recursive https://github.com/daniel-kukiela/nmt-chatbot```  
     (or)  
-    ```$ git clone --recursive https://github.com/daniel-kukiela/nmt-chatbot/tree/v0.1``` (for a version featured in Sentdex tutorial)
+    ```$ git clone --branch v0.1 --recursive https://github.com/daniel-kukiela/nmt-chatbot.git``` (for a version featured in Sentdex tutorial)
  2. ```$ cd nmt-chatbot```
  3. ```$ pip install -r requirements.txt``` TensorFlow-GPU is one of the requirements. You also need CUDA Toolkit 8.0 and cuDNN 6.1. (Windows tutorial: https://www.youtube.com/watch?v=r7-WPbx8VuY  Linux tutorial: https://pythonprogramming.net/how-to-cuda-gpu-tensorflow-deep-learning-tutorial/)
  4. ```$ cd setup```
