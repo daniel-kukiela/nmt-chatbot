@@ -78,7 +78,7 @@ preprocessing = {
 # hparams
 hparams = {
     'attention': 'scaled_luong',
-    'num_train_steps': 500000,
+    'num_train_steps': 10000000,
     'num_layers': 2,
     'num_units': 512,
 #    'batch_size': 128,
