@@ -1,5 +1,10 @@
 # List of regex-based replaces for answers
 # Format: regex ##->## replacement
-# Make sure to return only one group as only first group is used (rest of them are ignored)
 
 #(you) ##->## noone
+(\[\][ ]*\(\)) ##->##
+(\[([^\]]+)\][ ]*\((/r/[^)]+)\)) ##->## \1: https://www.reddit.com\2
+(\[[^\]]*\][ ]*\((/r/[^)]+)\)) ##->## https://www.reddit.com\1
+(\[([^\]]+)\][ ]*\((http[^)]+)\)) ##->## \1: \2
+(\[\][ ]*\((http[^)]+)\)) ##->## \1
+(\[[^\]]*\][ ]*\([^)]*\)) ##->##

@@ -1,0 +1,16 @@
+# Regex-based list of blacklisted sentences
+# Do not place <unk> here - it's blacklisted by default
+# Format: score modifier [space] phrase
+
+-100 ##->## .* ##->## ^\[\]\([^)]*$
+-100 ##->## .* ##->## ^\[\($
+-100 ##->## .* ##->## ^\[\]$
+-10 ##->## .* ##->## downvoted
+-12 ##->## .* ##->## (?i)I don't know
+-12 ##->## .* ##->## (?i)I'm not sure
+3 ##->## are you ##->## (?i)I'm
+3 ##->## you( are|'re) ##->## (?i)I'm
+-4 ##->## .* ##->## \\{4,}
+2 ##->## .* ##->## (USA?|England)[ .!]
+-2 ##->## .* ##->## I'm saying
+-2 ##->## .* ##->## I'm trying to say

@@ -59,9 +59,6 @@ preprocessing = {
     # File with protected phrases for BPE/WPM-like tokenizer
     'protected_phrases_bpe_file': os.path.join(package_path, 'setup/protected_phrases_bpe.txt'),
 
-    # File with blacklisted answers
-    'answers_blacklist_file': os.path.join(package_path, 'setup/answers_blacklist.txt'),
-
     # File with detokenizer rules
     'answers_detokenize_file': os.path.join(package_path, 'setup/answers_detokenize.txt'),
 
@@ -105,6 +102,111 @@ hparams = {
     'test_prefix': os.path.join(train_dir, "tst2013"),
     'out_dir': out_dir,
     'share_vocab': preprocessing['joined_vocab'],
+}
+
+# response score settings
+score = {
+
+    # File with blacklisted answers
+    'answers_subsentence_score_file': os.path.join(package_path, 'setup/answers_subsentence_score.txt'),
+
+    # Starting score of every output sentence (response)
+    'starting_score': 10,
+
+    # How to choose response to return
+    # - None - first response with best score
+    # - 'best_score' - random response with best score
+    # - 'above_threshold' - random response above or equal threshold
+    'pick_random': 'best_score',
+
+    # Threshold of good response
+    # 'above_threshold':
+    # - zero or greater - that value
+    # - negative value - difference from best score
+    # 'best_score' and None - returns sentence only if above threshold (including negative value)
+    'bad_response_threshold': 0,
+
+    ## Answer to question similarity (using Levenshtein ratio)
+
+    # 0..1
+    'question_answer_similarity_threshold': 0.75,
+
+    # Minimum sentence length to run test (allow very short responses similar to questions)
+    'question_answer_similarity_sentence_len': 10,
+
+    # Modifier type:
+    # - value - add given value
+    # - multiplier - diffrence between ratio and threshold divided by (1 - ratio) multiplied by modifier value
+    'question_answer_similarity_modifier': 'value',  # 'multiplier'
+
+    # Modifier value (None to disable)
+    'question_answer_similarity_modifier_value': -100,
+
+    ## Subsentence similarity
+
+    # Regular expression of subsentence dividers
+    'subsentence_dividers': "[\.,!\?;]|but",
+
+    # 0..1
+    'answer_subsentence_similarity_threshold': 0.5,
+
+    # Minimum sentence length to run test (allow very short responses similar to questions)
+    'answer_subsentence_similarity_sentence_len': 10,
+
+    # Modifier type:
+    # - value - add given value
+    # - multiplier - diffrence between ratio and threshold divided by (1 - ratio) multiplied by modifier value
+    'answer_subsentence_similarity_modifier': 'multiplier',  # 'value'
+
+    # Modifier value (None to disable)
+    'answer_subsentence_similarity_modifier_value': -10,
+
+    # Regular expression for where url ends
+    'url_delimiters': ' )',
+
+    # Modifier value for incorrect url (None to disable)
+    'incorrect_url_modifier_value': -100,
+
+    # Regular expression of sentence endings
+    'sentence_ending': '[\.!\?;]|FTFY',  # FTFY doesn;t end with dot
+
+    # Sentence length threshhold
+    'sentence_ending_sentence_len': 20,
+
+    # Tuple of two modifiers: (None to disable)
+    # - modifier if sentence is longer than length above
+    # - modifier if sentence is shorter (only if sententence ends with letter of digit), else threated as long sentence
+    'no_ending_modifier_value': (-100, -5),
+
+    # Unk modifier value (None to disable)
+    'unk_modifier_value': -100,
+
+    # Weather to use subsentence score file or not (modifier value included inside that file)
+    'use_subsentence_score': True,
+
+    # Response number modidier (key - starting index, value - modifier value)
+    'position_modifier': {1: 1.5, 2: 1, 4: 0.5, 8: 0},
+
+    # Ascii emoticon detector - ratio of non-word chars to all chars in word
+    'ascii_emoticon_non_char_to_all_chars_ratio': 0.7,
+
+    # Modifier value if asci detected (None to disable)
+    'ascii_emoticon_modifier_value': 1,
+
+    # Score reward for every word in sentence (None to disable)
+    'reward_long_sentence_value': 0.15,
+
+    # 'question_answer_diffrence_threshold': 0.7,
+    # 'question_answer_diffrence_sentence_len': 10,
+    # 'question_answer_diffrence_modifier': 'value',  # 'multiplier'
+    # 'question_answer_diffrence_modifier_value': None,
+
+    # To be removed, doesnt really work as expected
+    # 'answer_subsentence_diffrence_threshold': 0.5,
+    # 'answer_subsentence_diffrence_sentence_len': 10,
+    # 'answer_subsentence_diffrence_modifier': 'multiplier',  # 'value'
+    # 'answer_subsentence_diffrence_modifier_value': None,
+
 }
 
 
