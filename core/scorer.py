@@ -294,13 +294,14 @@ def score_answers(question, answers):
         #answer_subsentence_diffrence_by_distance,
     ]
 
-    scores = []
+    scores = {'score': [], 'score_modifiers': []}
 
     # Iterate thru answers, apply every scoring function
     for i, answer in enumerate(answers):
 
-        print([function(i+1, question, answer) for function in functions])
-        scores.append(score_settings['starting_score'] + sum([function(i+1, question, answer) for function in functions]))
+        score_modifiers = [function(i+1, question, answer) for function in functions]
+        scores['score'].append(score_settings['starting_score'] + sum(score_modifiers))
+        scores['score_modifiers'].append(score_modifiers)
 
     # Return score
     return scores
