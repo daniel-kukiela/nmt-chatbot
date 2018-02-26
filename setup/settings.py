@@ -207,6 +207,7 @@ score = {
     # 'answer_subsentence_diffrence_modifier': 'multiplier',  # 'value'
     # 'answer_subsentence_diffrence_modifier_value': None,
 
+    'show_score_modifiers': False,
 }
 
 
