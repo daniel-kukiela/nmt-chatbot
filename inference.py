@@ -2,16 +2,19 @@ import sys
 import os
 sys.path.append(os.path.realpath(os.path.dirname(__file__)))
 sys.path.append(os.path.realpath(os.path.dirname(__file__)) + "/nmt")
-import argparse
-from setup.settings import hparams, out_dir, preprocessing, score as score_settings
+sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)) + "/setup")
+sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)) + "/core")
 from nmt import nmt
+import argparse
+from settings import hparams, out_dir, preprocessing, score as score_settings
+sys.path.remove(os.path.realpath(os.path.dirname(__file__)) + "/setup")
 import tensorflow as tf
-from core.tokenizer import tokenize, detokenize, apply_bpe, apply_bpe_load
-from core.sentence import replace_in_answers, normalize_new_lines
-from core.scorer import score_answers
+from tokenizer import tokenize, detokenize, apply_bpe, apply_bpe_load
+from sentence import replace_in_answers, normalize_new_lines
+from scorer import score_answers
+sys.path.remove(os.path.realpath(os.path.dirname(__file__)) + "/core")
 import colorama
 import random
-
 
 current_stdout = None
 
@@ -182,19 +185,14 @@ inference_object = None
 inference_helper = start_inference
 
 # Main inference function
-def inference(questions, include_blacklisted = True):
+def inference(questions, print = False):
 
     # Process questions
     answers_list = process_questions(questions)
-    answers = answers_list[0]
-
-    # Print answers and scoring
-    if answers:
-        for i, _ in enumerate(answers['scores']):
-            print("{}- {}{} [{}]".format(colorama.Fore.GREEN if answers['scores'][i] == max(answers['scores']) and answers['scores'][i] >= score_settings['bad_response_threshold'] else colorama.Fore.YELLOW if answers['scores'][i] >= score_settings['bad_response_threshold'] else colorama.Fore.RED, answers['answers'][i], colorama.Fore.RESET, answers['scores'][i]))
+    #answers = answers_list[0]
 
     # Return (one or more?)
-    if len(answers_list) == 1:
+    if not isinstance(questions, list):
         return answers_list[0]
     else:
         return answers_list
@@ -203,7 +201,7 @@ def inference(questions, include_blacklisted = True):
 def inference_internal(questions):
 
     # Process questions and return
-    return process_questions(questions)
+    return process_questions(questions, True)
 
 
 # Get index and score for best answer
@@ -220,10 +218,8 @@ def get_best_score(answers_score):
     # Return random best scored response
     elif score_settings['pick_random'] == 'best_score':
         indexes = [index for index, score in enumerate(answers_score) if score == max(answers_score) and score >= score_settings['bad_response_threshold']]
-        print(indexes)
         if len(indexes):
             index = random.choice(indexes)
-            print(index)
             return (index, answers_score[index])
         else:
             return (-1, None)
@@ -240,7 +236,7 @@ def get_best_score(answers_score):
     return (0, score_settings['starting_score'])
 
 # Process question or list of questions
-def process_questions(questions):
+def process_questions(questions, return_score_modifiers = False):
 
     # Make a list
     if not isinstance(questions, list):
@@ -262,12 +258,14 @@ def process_questions(questions):
         answers = replace_in_answers(answers)
         answers = normalize_new_lines(answers)
         answers_score = score_answers(questions[index], answers)
-        best_index, best_score = get_best_score(answers_score)
+        best_index, best_score = get_best_score(answers_score['score'])
 
         if prepared_questions[index] == '##emptyquestion##':
             prepared_answers_list.append(None)
+        elif return_score_modifiers:
+            prepared_answers_list.append({'answers': answers, 'scores': answers_score['score'], 'best_index': best_index, 'best_score': best_score, 'score_modifiers': answers_score['score_modifiers']})
         else:
-            prepared_answers_list.append({'answers': answers, 'scores': answers_score, 'best_index': best_index, 'best_score': best_score})
+            prepared_answers_list.append({'answers': answers, 'scores': answers_score['score'], 'best_index': best_index, 'best_score': best_score})
 
     return prepared_answers_list
 
@@ -293,10 +291,10 @@ if __name__ == "__main__":
     # QAs
     while True:
         question = input("\n> ")
-        answers = process_questions(question)[0]
+        answers = inference_internal(question)[0]
         if answers is None:
-            print(colorama.Fore.RED + "! Question can't be empty")
+            print(colorama.Fore.RED + "! Question can't be empty" + colorama.Fore.RESET)
         else:
             for i, _ in enumerate(answers['scores']):
-                print("{}- {}{} [{}]".format(colorama.Fore.GREEN if answers['scores'][i] == max(answers['scores']) and answers['scores'][i] >= score_settings['bad_response_threshold'] else colorama.Fore.YELLOW if answers['scores'][i] >= score_settings['bad_response_threshold'] else colorama.Fore.RED, answers['answers'][i], colorama.Fore.RESET, answers['scores'][i]))
+                print("{}- {}{} [{}] {}{}{}".format(colorama.Fore.GREEN if answers['scores'][i] == max(answers['scores']) and answers['scores'][i] >= score_settings['bad_response_threshold'] else colorama.Fore.YELLOW if answers['scores'][i] >= score_settings['bad_response_threshold'] else colorama.Fore.RED, answers['answers'][i], colorama.Fore.RESET, answers['scores'][i], colorama.Fore.BLUE, answers['score_modifiers'][i] if score_settings['show_score_modifiers'] else '', colorama.Fore.RESET))
 
