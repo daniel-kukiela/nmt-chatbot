@@ -59,17 +59,11 @@ preprocessing = {
     # File with protected phrases for BPE/WPM-like tokenizer
     'protected_phrases_bpe_file': os.path.join(package_path, 'setup/protected_phrases_bpe.txt'),
 
-    # File with detokenizer rules
+    # File with detokenizer rules (for standard detokenizer)
     'answers_detokenize_file': os.path.join(package_path, 'setup/answers_detokenize.txt'),
 
     # File with replace rules for answers
     'answers_replace_file': os.path.join(package_path, 'setup/answers_replace.txt'),
-
-    # File with blacklisted answers
-    'vocab_blacklist_file': os.path.join(package_path, 'setup/vocab_blacklist.txt'),
-
-    # File with replace rules for vocab
-    'vocab_replace_file': os.path.join(package_path, 'setup/vocab_replace.txt'),
 
     # Number of processes to be spawned during tokenization (leave None for os.cpu_count())
     'cpu_count': None,
