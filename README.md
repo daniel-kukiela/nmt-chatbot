@@ -156,11 +156,13 @@ or:
 Importing nmt-chatbot
 -------------
 
-The project allows being imported for the needs of inference. Simply embed folder within your project and import, then use:
+The project allows being imported for the needs of inference. Simply embed folder within your project and import (notice: change folder name in a way it will not include dash (`-`) character - you can't import module with that character in it's name), then use:
 
-    from nmt-chatbot.inference import inference
+    from nmt_chatbot.inference import inference
 
     print(inference("Hello!"))
+
+(where `nmt_chatbot` is a directory name of chatbot module)
 
 inference() takes two parameters:
 
