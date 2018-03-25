@@ -1,21 +1,5 @@
-import sys
-sys.path.insert(0, '../')
 import os
-import errno
-from collections import Counter, defaultdict
-from setup.settings import preprocessing, hparams
-from core.tokenizer import tokenize, apply_bpe_init, apply_bpe, sentence_split
-from tqdm import tqdm
-from itertools import zip_longest
-from multiprocessing import Pool
-from threading import Thread
-import regex as re
-import json
-import colorama
 
-
-colorama.init()
-vocab = Counter()
 
 # Prepare all files
 def prepare():
@@ -81,7 +65,7 @@ def prepare():
                 last_batch = False
 
                 # Iterate every 10k lines
-                for rows in read_lines(in_file, 10000, ''):
+                for rows in read_lines(in_file, 30000, ''):
 
                     # If number of lines is greater than limit - break
                     read += len(rows)
@@ -90,10 +74,10 @@ def prepare():
                         last_batch = True
 
                     # Process using multiprocessing
-                    rows = pool.map(tokenize, rows, 100)
+                    rows = pool.map(tokenize, rows, 500)
 
                     # Process vocab using multiprocessing
-                    vocab_part = pool.map(sentence_split, rows, 100)
+                    vocab_part = pool.map(sentence_split, rows, 500)
 
                     # Join running threads from previous loop
                     if write_thread is not None:
@@ -503,4 +487,21 @@ def append_vocab(lines):
 
 # Prepare training data set
 if __name__ == "__main__":
+    import errno
+    from collections import Counter, defaultdict
+    from setup.settings import preprocessing, hparams
+    from core.tokenizer import apply_bpe_init, apply_bpe, sentence_split
+    from tqdm import tqdm
+    from itertools import zip_longest
+    from multiprocessing import Pool
+    from threading import Thread
+    import regex as re
+    import json
+    import colorama
+    import pickle
+    from pathlib import Path
+
+    colorama.init()
+    vocab = Counter()
+
     prepare()
