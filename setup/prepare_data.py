@@ -179,7 +179,7 @@ def prepare():
 
             # Partial stats speeds up learning process - optimization for 'max' above
             partial_stats = Counter(['', -1])
-            partial_stats_min = 0
+            partial_stats_min = -1
             update_partial_stats = True
 
             # Current number of vocab tokens
@@ -199,8 +199,8 @@ def prepare():
                 most_frequent, freq = partial_stats.most_common(1)[0]
 
                 # Update partial stats or frequency of most frequent pair is less than saved minimum for partial stats
-                if update_partial_stats or freq <= partial_stats_min:
-                    partial_stats_min = partial_stats.most_common(500)[-1][1]
+                if update_partial_stats or freq < partial_stats_min:
+                    partial_stats_min = stats.most_common(500)[-1][1]
                     partial_stats = Counter()
                     for k, v in stats.most_common():
                         if v < partial_stats_min:
@@ -298,16 +298,18 @@ def prepare():
                         if i:
                             prev = entity[i - 1:i + 1]
                             stats[prev] += freq
-                            if stats[prev] > partial_stats_min:
-                                update_partial_stats = True
+                            #if stats[prev] >= partial_stats_min:
+                            #    update_partial_stats = True
+                            partial_stats[prev] = stats[prev]
                             indices[prev][j] += 1
 
                         # Increase frequency of (new pair) "BC D" in "A BC D", but do not touch if "A BC BC" as stats for "BC BC" will be adjusted win next occurence of "BC" pair
                         if i < len(entity) - 1 and entity[i + 1] != new_pair:
                             next = entity[i:i + 2]
                             stats[next] += freq
-                            if stats[next] > partial_stats_min:
-                                update_partial_stats = True
+                            #if stats[next] >= partial_stats_min:
+                            #    update_partial_stats = True
+                            partial_stats[prev] = stats[prev]
                             indices[next][j] += 1
 
                         # Set frequency of a new pair
