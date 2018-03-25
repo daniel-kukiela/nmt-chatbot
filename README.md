@@ -75,9 +75,9 @@ Rules files
 
 Setup folder contains multiple "rules" files (All of them are regex-based:
 
- - answers_blacklist.txt - disallows answer from being returned (more on that later).
- - answers_detokenize.txt - detokenization rules (removes unnecessary spaces).
+ - answers_detokenize.txt - detokenization rules (removes unnecessary spaces, legacy tokenizer only).
  - answers_replace - synonyms, replaces phrase or it's part with a replacement.
+ - answers_subsentence_score.txt - rules for answer score (list of subsentences and score modifiers that can either lower or raise score when includes certain subsentences).
  - protected_phrases_standard.txt - ensures that matching phrases will remain untouched when building vocab file with standard tokenizer.
  - protected_phrases_bpe.txt - same as above but for BPE/WPM-like tokenizer.
 
@@ -104,12 +104,13 @@ setup/settings.py consist of multiple settings:
  - untouched file/folder paths should fit for most cases
  - "preprocessing" dictionary should be easy to understand
  - "hparams" dictionary will be passed to NMT like command line options with standard usage
+ - "score" dictionary with settings for answer scoring
 
 setup/prepare_data.py:
 
  - walks thru files placed in "new_data" folder - train.(from|to), tst2012.(from|to)m tst2013(from|to)
- - tokenizes all sentences (adds spaces based on internal rules)
- - for "train" files - builds vocabulary files and checks entities against vocab_replace.txt rules, then vocab_blacklist_rules.txt, finally makes dictionary unique and saves up to the number of entities set in setup/settings.py file, rest of entities will be saved to separate file
+ - tokenizes all sentences (based on settings and internal rules)
+ - for "train" files - builds vocabulary files, makes them unique and saves up to the number of entities set in setup/settings.py file, unused vocab entities (if any - depends on settings) will be saved to separate files
 
 train.py - starts training process
 
@@ -164,29 +165,23 @@ The project allows being imported for the needs of inference. Simply embed folde
 
 (where `nmt_chatbot` is a directory name of chatbot module)
 
-inference() takes two parameters:
+inference() takes one parameter:
 
  - `question` (required)
- - `include_blacklisted = True` (optional)
 
 For a single question, function will return dictionary containing:
 
  - answers - list of all answers
  - scores - list of scores for answers
  - best_index - index of best answer
- - best_score - score of best answer (-1, 0 or 1)
+ - best_score - score of best answer
 
 Score:
 
- - -1 - inproper response - includes `<unk>`
- - 0 - proper response but blacklisted
- - 1 - proper response - passed checks
+Every response starts with `score['starting_score']` value from `setup/settings.py` (10 by default) and is further modified by various checks. Please refer to `score` section of `setup/settings.py` for more details and settings. Final score is next used to pick "best" response.
 
 With a list of questions, the function will return a list of dictionaries.
 
 For every empty question, the function will return `None` instead of result dictionary.
-
-With `include_blacklisted` set to false function will return either -1 or 1 for the score (and related to that score index)
-
 
 ----------
