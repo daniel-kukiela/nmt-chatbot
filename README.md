@@ -1,6 +1,18 @@
 nmt-chatbot
 ===================
 
+Table of Contents
+-------------
+1. [Introcuction](#introduction)
+2. [Setup](#setup)
+3. [Standard vs BPE/WPM-like (subword) tokenization, embedded detokenizer](#standard-vs-bpewpm-like-subword-tokenization-embedded-detokenizer)
+4. [Rules files](#rules-files)
+5. [Tests](#tests)
+6. [More detailed information about training a model](#more-detailed-information-about-training-a-model)
+7. [Utils](#utils)
+8. [Inference](#inference)
+9. [Importing nmt-chatbot](#importing-nmt-chatbot)
+10. [Changelog](#changelog)
 
 Introduction
 -------------
@@ -183,5 +195,32 @@ Every response starts with `score['starting_score']` value from `setup/settings.
 With a list of questions, the function will return a list of dictionaries.
 
 For every empty question, the function will return `None` instead of result dictionary.
+
+
+Changelog
+---------
+
+### Master
+- New response scoring engine (work in progress, suggestions and code improvements are welcome)
+- Showing score modifiers in 'live' inference mode
+- Fixed 'learning bpe' stage of 'prepare_data' speed issue (it's multiple times faster now)
+- Improved 'prepare training set' stage of 'prepare_data' speed (should run about 1/3rd faster)
+- Fixed model paths - pathhs are relative now, so model can be easily moved between different paths or even machines
+- Fixed info about importing project as a module
+- Updated README
+- Added changelog
+- various fixes and other small improvements
+
+### v0.2
+- BPE/WPM-like tokenizer
+- Updated NMT
+- Enabled NMT's SMP detokenizer with our embedded BPE/WPM-like tokenizer
+- Fixed issue with paths on Linux and MacOS machines
+- Improved pair testing utility
+- Fixed command for tag cloning
+- various fixes and other small improvements, improved readme file
+
+### v0.1
+- Initial commit, code for tutorial: https://pythonprogramming.net/chatbot-deep-learning-python-tensorflow/
 
 ----------
