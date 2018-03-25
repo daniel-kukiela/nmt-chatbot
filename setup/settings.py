@@ -3,16 +3,16 @@ import os
 ## Internal path settings
 
 # Root package path (leave as is, or type full path)
-package_path = os.path.realpath(os.path.dirname(__file__) + '/..')
+package_path = './'
 
 # Model path
-out_dir = os.path.join(package_path, "model")
+out_dir = os.path.join(package_path, "model/")
 
 # Training data path
-train_dir = os.path.join(package_path, "data")
+train_dir = os.path.join(package_path, "data/")
 
 # Raw data path (data to be prepared and tokenized)
-source_dir = os.path.join(package_path, "new_data")
+source_dir = os.path.join(package_path, "new_data/")
 
 
 ## Settings you can adjust
@@ -87,7 +87,7 @@ hparams = {
 #    'residual': True,
     'optimizer': 'adam',
     'encoder_type': 'bi',
-    'learning_rate':0.001,
+    'learning_rate': 0.001,
     'beam_width': 20,
     'length_penalty_weight': 1.0,
     'num_translations_per_input': 20,

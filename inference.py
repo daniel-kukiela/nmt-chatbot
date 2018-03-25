@@ -1,5 +1,7 @@
 import sys
 import os
+original_cwd = os.getcwd()
+os.chdir(os.path.realpath(os.path.dirname(__file__)))
 sys.path.append(os.path.realpath(os.path.dirname(__file__)))
 sys.path.append(os.path.realpath(os.path.dirname(__file__)) + "/nmt")
 sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)) + "/setup")
@@ -187,9 +189,15 @@ inference_helper = start_inference
 # Main inference function
 def inference(questions, print = False):
 
+    # Change current working directory (needed to load relative paths properly)
+    os.chdir(os.path.realpath(os.path.dirname(__file__)))
+
     # Process questions
     answers_list = process_questions(questions)
     #answers = answers_list[0]
+
+    # Revert current working directory
+    os.chdir(original_cwd)
 
     # Return (one or more?)
     if not isinstance(questions, list):
@@ -298,3 +306,4 @@ if __name__ == "__main__":
             for i, _ in enumerate(answers['scores']):
                 print("{}- {}{} [{}] {}{}{}".format(colorama.Fore.GREEN if answers['scores'][i] == max(answers['scores']) and answers['scores'][i] >= score_settings['bad_response_threshold'] else colorama.Fore.YELLOW if answers['scores'][i] >= score_settings['bad_response_threshold'] else colorama.Fore.RED, answers['answers'][i], colorama.Fore.RESET, answers['scores'][i], colorama.Fore.BLUE, answers['score_modifiers'][i] if score_settings['show_score_modifiers'] else '', colorama.Fore.RESET))
 
+os.chdir(original_cwd)

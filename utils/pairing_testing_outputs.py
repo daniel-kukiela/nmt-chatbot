@@ -1,7 +1,8 @@
-import sys
-sys.path.insert(0, '../')
-from setup.settings import hparams, preprocessing
 import os
+os.chdir(os.path.realpath(os.path.dirname(os.path.dirname(__file__))))
+import sys
+sys.path.insert(0, os.getcwd())
+from setup.settings import hparams, preprocessing
 
 
 # Quick file to pair epoch outputs w/ original test file
