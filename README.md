@@ -3,7 +3,7 @@ nmt-chatbot
 
 Table of Contents
 -------------
-1. [Introcuction](#introduction)
+1. [Introduction](#introduction)
 2. [Setup](#setup)
 3. [Standard vs BPE/WPM-like (subword) tokenization, embedded detokenizer](#standard-vs-bpewpm-like-subword-tokenization-embedded-detokenizer)
 4. [Rules files](#rules-files)
