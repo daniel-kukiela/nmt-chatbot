@@ -153,9 +153,10 @@ def replace(entity):
     protected_phrases_counter += 1
     return replacement
 
-# Load detokenizer rules
-with open(preprocessing['answers_detokenize_file'], 'r', encoding='utf-8') as answers_detokenize_file:
-    answers_detokenize_regex = list(filter(lambda word: False if word[0] == '#' else True, filter(None, answers_detokenize_file.read().split("\n"))))
+# Load detokenizer rules (for standard detokenizer)
+if not preprocessing['embedded_detokenizer']:
+    with open(preprocessing['answers_detokenize_file'], 'r', encoding='utf-8') as answers_detokenize_file:
+        answers_detokenize_regex = list(filter(lambda word: False if word[0] == '#' else True, filter(None, answers_detokenize_file.read().split("\n"))))
 
 # Returns detokenizes sentences
 def detokenize(answers):
