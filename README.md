@@ -141,21 +141,21 @@ utils/pairing_testing_outputs.py - joins model/output_dev file with data/tst2012
 Inference
 -------------
 
-Whenever a model is trained, inference.py, when directly called, allows to "talk to" AI in interactive mode. It will start and setup everything needed to use trained model (using saved hparams file within the model folder and setup/settings.py for the rest of settings or lack of hparams file).
+Whenever a model is trained, `inference.py`, when directly called, allows to "talk to" AI in interactive mode. It will start and setup everything needed to use trained model (using saved hparams file within the model folder and setup/settings.py for the rest of settings or lack of hparams file).
 
 For every question will be printed up to a number of responses set in setup/settings.py. Every response will be marked with one of three colors:
 
  - green - first one with that color is a candidate to be returned. Answers to the color passed blacklist check (setup/response_blacklist.txt)
- - orange - still proper responses, but doesn't pass check against the blacklist
- - red - improper response - includes `<unk>`
+ - orange - still proper responses, but with lower than maximum score
+ - red - improper response - below threshold
 
 Steps from the question to the answers:
 
  1. Pass question
  2. Compute up to number of responses set in setup/settings.py
- 3. Detokenize answers using rules from setup/answers_detokenized.txt
- 3. Replace responses or their parts using rules from setup/answers_replace.txt
- 4. Score responses with -1 (includes `<unk>`, 0 (matches against at least one rule in setup/answers_blacklist.txt file) or 1 (passes all checks)
+ 3. Detokenize answers using either embedded detokenizer or rules from setup/answers_detokenized.txt (depending on settings)
+ 3. Replace responses or their parts using additional rules
+ 4. Score responses
  5. Return (show with interactive mode) responses
 
 It is also possible to process a batch of the questions by simply using command redirection:
@@ -165,6 +165,11 @@ It is also possible to process a batch of the questions by simply using command 
 or:
 
     python inference.py < input_file > output_file
+
+It is possible to pass specified checkpoint as a parameter to use inference using that checkpoint, for example:
+
+    python inference.py translate.ckpt-1000
+
 
 Importing nmt-chatbot
 -------------
@@ -209,7 +214,9 @@ Changelog
 - Fixed info about importing project as a module
 - Updated README
 - Added changelog
-- various fixes and other small improvements
+- Added table of contents
+- Added passing checkpoint name as a parameter for inference
+- Various fixes and other small improvements
 
 ### v0.2
 - BPE/WPM-like tokenizer
@@ -218,7 +225,7 @@ Changelog
 - Fixed issue with paths on Linux and MacOS machines
 - Improved pair testing utility
 - Fixed command for tag cloning
-- various fixes and other small improvements, improved readme file
+- Various fixes and other small improvements, improved readme file
 
 ### v0.1
 - Initial commit, code for tutorial: https://pythonprogramming.net/chatbot-deep-learning-python-tensorflow/

@@ -293,8 +293,14 @@ if __name__ == "__main__":
         sys.exit()
 
     # Interactive mode
-    print("\n\nStarting interactive mode (first response will take a while):")
     colorama.init()
+    print("\n\nStarting interactive mode (first response will take a while):")
+
+    # Specified model
+    if len(sys.argv) >= 2 and sys.argv[1]:
+        checkpoint = hparams['out_dir'] + str(sys.argv[1])
+        hparams['ckpt'] = checkpoint
+        print("Using checkpoint: {}".format(checkpoint))
 
     # QAs
     while True:
