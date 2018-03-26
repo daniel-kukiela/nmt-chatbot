@@ -45,7 +45,10 @@ preprocessing = {
     'test_size': 100,
 
 
-    ## You don't need to change anything below (internal settings)
+    ## You don't normally need to change anything below (internal settings)
+
+    # Cache 'prepairing training set' and 'building temporary vocab' steps
+    'cache_preparation': True,
 
     # Source (raw) data folder
     'source_folder': source_dir,
@@ -87,7 +90,7 @@ hparams = {
     'num_translations_per_input': 20,
 #    'num_keep_ckpts': 5,
 
-    ## You don't need to change anything below (internal settings)
+    ## You don't normally need to change anything below (internal settings)
     'src': 'from',
     'tgt': 'to',
     'vocab_prefix': os.path.join(train_dir, "vocab"),
