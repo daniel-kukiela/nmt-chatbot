@@ -12,7 +12,8 @@ Table of Contents
 7. [Utils](#utils)
 8. [Inference](#inference)
 9. [Importing nmt-chatbot](#importing-nmt-chatbot)
-10. [Changelog](#changelog)
+10. [Deploying chatbot/model](#deploying-chatbotmodel)
+11. [Changelog](#changelog)
 
 Introduction
 -------------
@@ -132,11 +133,11 @@ train.py - starts training process
 Utils
 -------------
 
-utils/run_tensorboard.py is easy to use wrapper starting Tensorboard with model folder
+`utils/run_tensorboard.py` is easy to use wrapper starting Tensorboard with model folder
 
-utils/pairing_testing_outputs.py - joins model/output_dev file with data/tst2012.form file and prints result to a console allowing easy check if things are going ok during training. The console will consist of input phrase, inference output frame, and separator.
+`utils/pairing_testing_outputs.py` - joins model/output_dev file with data/tst2012.form file and prints result to a console allowing easy check if things are going ok during training. The console will consist of input phrase, inference output frame, and separator.
 
-
+`utils/prepare_for_deployment` - copies only necessary files for inference. [See more below](#deploying-chatbotmodel)
 
 Inference
 -------------
@@ -202,6 +203,19 @@ With a list of questions, the function will return a list of dictionaries.
 For every empty question, the function will return `None` instead of result dictionary.
 
 
+Deploying chatbot/model
+-----------------------
+
+Whether model is trained, there might be a need to export only files necessary for interference (for example to be embeded and imported it other project).
+
+That might be achieved automatically by using `prepare_for_deployment` utility:
+
+    cd utils
+    python prepare_for_deployment.py
+
+Script will create `_deployment` folder inside project's root directory and copy all necessary files depending on your current settings.
+
+
 Changelog
 ---------
 
@@ -216,6 +230,7 @@ Changelog
 - Added changelog
 - Added table of contents
 - Added passing checkpoint name as a parameter for inference
+- Added deployment script
 - Various fixes and other small improvements
 
 ### v0.2
