@@ -36,7 +36,7 @@ preprocessing = {
     
     # Whether to use:
     # - embedded detokenizer (increases number of vocab tokens, but is more accurate)
-    # - external/rule-based detokenizer (based of a bunch of rules and regular expressions -
+    # - external/rule-based detokenizer (based of a bunch of rules and regular expressions)
     #   doesn't increase number of tokens in vocab, but it's hard to make a rule for every case)
     # Note, that embedded detokenizer is forced to True while using BPE-like tokenizer
     'embedded_detokenizer': True,
@@ -48,7 +48,7 @@ preprocessing = {
     ## You don't normally need to change anything below (internal settings)
 
     # Cache 'prepairing training set' and 'building temporary vocab' steps
-    'cache_preparation': True,
+    'cache_preparation': False,
 
     # Source (raw) data folder
     'source_folder': source_dir,
