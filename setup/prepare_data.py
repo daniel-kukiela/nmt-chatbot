@@ -36,6 +36,8 @@ def prepare():
         if e.errno != errno.EEXIST:
             raise
 
+    corpus_size = 0
+
     if not preprocessing['cache_preparation'] or not Path('{}/cache_data_vocab.pickle'.format(preprocessing['train_folder'])).exists() or not Path('{}/cache_data_vocab.pickle'.format(preprocessing['train_folder'])).is_file():
 
         data_vocab = Counter()
@@ -63,7 +65,14 @@ def prepare():
             with Pool(processes=preprocessing['cpu_count']) as pool:
 
                 # Count number of lines in file
-                progress = tqdm(ascii=True, unit=' lines', total=min(amount, sum(1 for _ in open('{}{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072))))
+                number_of_records = sum(1 for _ in open('{}{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072))
+                if file_name == '{}.{}'.format(hparams['train_prefix'].replace('.bpe', ''), hparams['src']).replace(preprocessing['train_folder'], '').lstrip('\\/'):
+                    corpus_size = number_of_records
+                    with open('{}/corpus_size'.format(preprocessing['train_folder']), 'w') as f:
+                        f.write(str(corpus_size))
+                elif file_name == '{}.{}'.format(hparams['train_prefix'].replace('.bpe', ''), hparams['tgt']).replace(preprocessing['train_folder'], '').lstrip('\\/'):
+                    number_of_records = corpus_size
+                progress = tqdm(ascii=True, unit=' lines', total=min(amount, number_of_records))
 
                 # Open input file
                 with open('{}{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072) as in_file:
@@ -401,7 +410,17 @@ def prepare():
             with Pool(processes=preprocessing['cpu_count'], initializer=apply_bpe_init, initargs=(joins[source],)) as pool:
 
                 # Progress bar
-                progress = tqdm(ascii=True, unit=' lines', total=sum(1 for _ in open('{}{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')), 'r', encoding='utf-8', buffering=131072)))
+                if file_name == '{}.{}'.format(hparams['train_prefix'], hparams['src']).replace(preprocessing['train_folder'], '').lstrip('\\/'):
+                    if not corpus_size:
+                        with open('{}/corpus_size'.format(preprocessing['train_folder']), 'r') as f:
+                            number_of_records = corpus_size = int(f.read())
+                    else:
+                        number_of_records = corpus_size
+                elif file_name == '{}.{}'.format(hparams['train_prefix'], hparams['tgt']).replace(preprocessing['train_folder'], '').lstrip('\\/'):
+                    number_of_records = corpus_size
+                else:
+                    number_of_records = sum(1 for _ in open('{}{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')), 'r', encoding='utf-8', buffering=131072))
+                progress = tqdm(ascii=True, unit=' lines', total=number_of_records)
 
                 # Open input file
                 with open('{}{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')), 'r', encoding='utf-8', buffering=131072) as in_file:
