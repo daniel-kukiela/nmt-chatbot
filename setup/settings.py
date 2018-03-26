@@ -2,8 +2,8 @@ import os
 
 ## Internal path settings
 
-# Root package path (leave as is, or type full path)
-package_path = './'
+# Root package path (do not change if you're unsure about that change)
+package_path = ''
 
 # Model path
 out_dir = os.path.join(package_path, "model/")
