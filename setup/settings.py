@@ -44,6 +44,15 @@ preprocessing = {
     # Test sets' max size
     'test_size': 100,
 
+    # Custom decaying scheme and training duration:
+    # - trains model for certain number of epochs (number of list entries)
+    # - applies learning rate for every epoch
+    # - default: [0.001, 0.0001, 0.00001] - means: train for 3 epochs using choosen learing rates for corresponding epoch
+    # - automatically sets number of steps and restarts training every epoch with changed learning rate
+    # - ends training after set number of epochs
+    # Set to None to disable
+    'epochs': [0.001, 0.0001, 0.00001],
+
 
     ## You don't normally need to change anything below (internal settings)
 

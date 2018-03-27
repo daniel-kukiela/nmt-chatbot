@@ -3,7 +3,7 @@ nmt-chatbot
 
 Table of Contents
 -------------
-1. [Introduction](#introduction)
+1. [Introcuction](#introduction)
 2. [Setup](#setup)
 3. [Standard vs BPE/WPM-like (subword) tokenization, embedded detokenizer](#standard-vs-bpewpm-like-subword-tokenization-embedded-detokenizer)
 4. [Rules files](#rules-files)
@@ -47,6 +47,7 @@ If you want to use exactly what's in tutorial made by Sentdex, use v0.1 tag. The
  9. ```$ cd ../```
  10. ```$ python train.py``` Begin training
 
+Version 0.3 introduces epoch-based training including custom (epoch-based as well) decaying scheme - refer to `preprocessing['epochs']` in `setup/settings.py` for more detailed explanation and example (enabled by default).
 
 
 Standard vs BPE/WPM-like (subword) tokenization, embedded detokenizer
@@ -139,6 +140,9 @@ Utils
 
 `utils/prepare_for_deployment` - copies only necessary files for inference. [See more below](#deploying-chatbotmodel)
 
+
+
+
 Inference
 -------------
 
@@ -172,6 +176,7 @@ It is possible to pass specified checkpoint as a parameter to use inference usin
     python inference.py translate.ckpt-1000
 
 
+
 Importing nmt-chatbot
 -------------
 
@@ -203,6 +208,7 @@ With a list of questions, the function will return a list of dictionaries.
 For every empty question, the function will return `None` instead of result dictionary.
 
 
+
 Deploying chatbot/model
 -----------------------
 
@@ -214,6 +220,7 @@ That might be achieved automatically by using `prepare_for_deployment` utility:
     python prepare_for_deployment.py
 
 Script will create `_deployment` folder inside project's root directory and copy all necessary files depending on your current settings.
+
 
 
 Changelog
@@ -231,6 +238,9 @@ Changelog
 - Added table of contents
 - Added passing checkpoint name as a parameter for inference
 - Added deployment script
+- Added ability to cache some `prepare_data` common steps for multiple script run
+- Added epoch-based training
+- Added custom decaying scheme (epoch-based)
 - Various fixes and other small improvements
 
 ### v0.2
