@@ -65,14 +65,14 @@ def prepare():
             with Pool(processes=preprocessing['cpu_count']) as pool:
 
                 # Count number of lines in file
-                number_of_records = sum(1 for _ in open('{}{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072))
+                number_of_records = min(amount, sum(1 for _ in open('{}{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072)))
                 if file_name == '{}.{}'.format(hparams['train_prefix'].replace('.bpe', ''), hparams['src']).replace(preprocessing['train_folder'], '').lstrip('\\/'):
                     corpus_size = number_of_records
                     with open('{}/corpus_size'.format(preprocessing['train_folder']), 'w') as f:
                         f.write(str(corpus_size))
                 elif file_name == '{}.{}'.format(hparams['train_prefix'].replace('.bpe', ''), hparams['tgt']).replace(preprocessing['train_folder'], '').lstrip('\\/'):
                     number_of_records = corpus_size
-                progress = tqdm(ascii=True, unit=' lines', total=min(amount, number_of_records))
+                progress = tqdm(ascii=True, unit=' lines', total=number_of_records)
 
                 # Open input file
                 with open('{}{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072) as in_file:
