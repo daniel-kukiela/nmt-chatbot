@@ -231,7 +231,7 @@ We have trained demo model. It's deployment-ready package.
 
 As it's a demo model, it was trained on small data-set (corpus) of one million pairs and using relatively small neural network. It is not a decent model, but good enough to try it and see how it's working.
 
-You can download package [here](#https://www.dropbox.com/s/2w4i77fancf4voc/nmt_chatbot.zip?dl=0). It includes all but also only necessary files to run inference (doesn't include training corpus for example). All model settings can be found in `setup/setting.py` file.
+You can download package [here](https://www.dropbox.com/s/2w4i77fancf4voc/nmt_chatbot.zip?dl=0). It includes all but also only necessary files to run inference (doesn't include training corpus for example). All model settings can be found in `setup/setting.py` file.
 
 
 Changelog
