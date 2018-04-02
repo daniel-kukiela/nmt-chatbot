@@ -1,5 +1,7 @@
+import os
+os.chdir(os.path.realpath(os.path.dirname(os.path.dirname(__file__))))
 import sys
-sys.path.insert(0, '../')
+sys.path.insert(0, os.getcwd())
 from setup.settings import hparams
 import subprocess
 
