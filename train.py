@@ -41,7 +41,14 @@ def train():
 
             # Calculate new number of training steps - up to the end of current epoch
             num_train_steps = math.ceil((epoch + 1) * corpus_size / (hparams['batch_size'] if 'batch_size' in hparams else 128))
-            print("\n{}Epoch: {}, learning rate: {} - training{}\n".format(colorama.Fore.GREEN, epoch + 1, learning_rate, colorama.Fore.RESET))
+            print("\n{}Epoch: {}, steps per epoch: {}, epoch ends at {} steps, learning rate: {} - training{}\n".format(
+                colorama.Fore.GREEN,
+                epoch + 1,
+                math.ceil(corpus_size / (hparams['batch_size'] if 'batch_size' in hparams else 128)),
+                num_train_steps,
+                learning_rate,
+                colorama.Fore.RESET
+            ))
 
             # Override hparams
             hparams['num_train_steps'] = num_train_steps
