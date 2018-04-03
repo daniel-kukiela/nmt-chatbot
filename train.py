@@ -9,6 +9,7 @@ from nmt import nmt
 import tensorflow as tf
 import colorama
 from threading import Thread
+from setup.custom_summary import custom_summary
 
 colorama.init()
 
@@ -79,6 +80,9 @@ def nmt_train():
 
     # But we have to hack settings from our config in there instead of commandline options
     nmt.FLAGS, unparsed = nmt_parser.parse_known_args(['--'+k+'='+str(v) for k,v in hparams.items()])
+
+    # Add custom summary function (hook)
+    nmt.summary_callback = custom_summary
 
     # And now we can run TF with modified arguments
     tf.app.run(main=nmt.main, argv=[os.getcwd() + '\nmt\nmt\nmt.py'] + unparsed)

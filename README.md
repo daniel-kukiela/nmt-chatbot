@@ -5,16 +5,17 @@ Table of Contents
 -------------
 1. [Introduction](#introduction)
 2. [Setup](#setup)
-3. [Standard vs BPE/WPM-like (subword) tokenization, embedded detokenizer](#standard-vs-bpewpm-like-subword-tokenization-embedded-detokenizer)
-4. [Rules files](#rules-files)
-5. [Tests](#tests)
-6. [More detailed information about training a model](#more-detailed-information-about-training-a-model)
-7. [Utils](#utils)
-8. [Inference](#inference)
-9. [Importing nmt-chatbot](#importing-nmt-chatbot)
-10. [Deploying chatbot/model](#deploying-chatbotmodel)
-11. [Demo chatbot](#demo-chatbot)
-12. [Changelog](#changelog)
+3. [Custom summary values (evaluation)](#custom-summary-values-evaluation)
+4. [Standard vs BPE/WPM-like (subword) tokenization, embedded detokenizer](#standard-vs-bpewpm-like-subword-tokenization-embedded-detokenizer)
+5. [Rules files](#rules-files)
+6. [Tests](#tests)
+7. [More detailed information about training a model](#more-detailed-information-about-training-a-model)
+8. [Utils](#utils)
+9. [Inference](#inference)
+10. [Importing nmt-chatbot](#importing-nmt-chatbot)
+11. [Deploying chatbot/model](#deploying-chatbotmodel)
+12. [Demo chatbot](#demo-chatbot)
+13. [Changelog](#changelog)
 
 Introduction
 -------------
@@ -49,6 +50,26 @@ If you want to use exactly what's in tutorial made by Sentdex, use v0.1 tag. The
  10. ```$ python train.py``` Begin training
 
 Version 0.3 introduces epoch-based training including custom (epoch-based as well) decaying scheme - refer to `preprocessing['epochs']` in `setup/settings.py` for more detailed explanation and example (enabled by default).
+
+
+
+Custom summary values (evaluation)
+----------------------------------
+
+It is possible to add custom values logged into model logs. TensorBoard will plot those values in a separate graphs.
+
+To add custom values, modify `custom_summary` function inside `setup/custom_summary.py`.
+
+Data object is a list of tuples, where tuple contains:
+- source phrase
+- target phrase
+- nmt phrase
+
+Return must be a dictionary, where:
+- key - lowercase ascii letters only plus underscore
+- value - float value
+
+Function is called on every evaluation. As a result returned values will be saved in model logs and plot in TensorBoard.
 
 
 Standard vs BPE/WPM-like (subword) tokenization, embedded detokenizer
@@ -252,6 +273,8 @@ Changelog
 - Added ability to cache some `prepare_data` common steps for multiple script run
 - Added epoch-based training
 - Added custom decaying scheme (epoch-based)
+- Added ability to return own evaluation values (will be plotted in TensorBoard)
+- Updated `NMT` fork (fixed `train_ppl` graph, added evaluation outputs saved to a separate files, added ability to pass custom evaluation callback function)
 - Various fixes and other small improvements
 
 ### v0.2
