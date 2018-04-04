@@ -1,7 +1,7 @@
 
 # Default custom summary (does nothing)
 def custom_summary(data):
-    return []
+    return {}
 
 # Example custom summary
 def example_custom_summary(data):
@@ -30,4 +30,4 @@ def example_custom_summary(data):
         }
     except Exception as e:
         print('Error in custom summary function: {}'.format(str(e)))
-        return []
+        return {}
