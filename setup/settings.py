@@ -86,6 +86,8 @@ hparams = {
     'attention': 'scaled_luong',
     'num_train_steps': 10000000,
     'num_layers': 2,
+#    'num_encoder_layers': 2,
+#    'num_decoder_layers': 2,
     'num_units': 512,
 #    'batch_size': 128,
 #    'override_loaded_hparams': True,

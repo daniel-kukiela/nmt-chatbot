@@ -275,6 +275,7 @@ Changelog
 - Added custom decaying scheme (epoch-based)
 - Added ability to return own evaluation values (will be plotted in TensorBoard)
 - Updated `NMT` fork (fixed `train_ppl` graph, added evaluation outputs saved to a separate files, added ability to pass custom evaluation callback function)
+- Merged latest `NMT` changes into our fork
 - Various fixes and other small improvements
 
 ### v0.2
