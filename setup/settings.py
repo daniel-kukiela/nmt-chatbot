@@ -115,6 +115,9 @@ hparams = {
 # response score settings
 score = {
 
+    # Either to use scoring or score responses by order only
+    'use_scoring': True,
+
     # File with blacklisted answers
     'answers_subsentence_score_file': os.path.join(package_path, 'setup/answers_subsentence_score.txt'),
 
@@ -235,3 +238,6 @@ if preprocessing['use_bpe']:
 
 if preprocessing['joined_vocab']:
     hparams['share_vocab'] = True
+
+if not score['use_scoring']:
+    score['bad_response_threshold'] = 0

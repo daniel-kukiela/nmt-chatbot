@@ -279,6 +279,10 @@ def answer_subsentence_diffrence_by_distance(index, question, answer):
 # Score response
 def score_answers(question, answers):
 
+    # Scoring enabled?
+    if not score_settings['use_scoring']:
+        return {'score': list(reversed(range(-len(answers) + 1, 1))), 'score_modifiers': [] * len(answers)}
+
     # Functions to run
     functions = [
         check_urls,
