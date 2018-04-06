@@ -1,20 +1,20 @@
 import sys
 import os
 original_cwd = os.getcwd()
-os.chdir(os.path.realpath(os.path.dirname(__file__)))
-sys.path.append(os.path.realpath(os.path.dirname(__file__)))
-sys.path.append(os.path.realpath(os.path.dirname(__file__)) + "/nmt")
-sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)) + "/setup")
-sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)) + "/core")
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/nmt")
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/setup")
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/core")
 from nmt import nmt
 import argparse
 from settings import hparams, out_dir, preprocessing, score as score_settings
-sys.path.remove(os.path.realpath(os.path.dirname(__file__)) + "/setup")
+sys.path.remove(os.path.dirname(os.path.realpath(__file__)) + "/setup")
 import tensorflow as tf
 from tokenizer import tokenize, detokenize, apply_bpe, apply_bpe_load
 from sentence import replace_in_answers, normalize_new_lines
 from scorer import score_answers
-sys.path.remove(os.path.realpath(os.path.dirname(__file__)) + "/core")
+sys.path.remove(os.path.dirname(os.path.realpath(__file__)) + "/core")
 import colorama
 import random
 
@@ -190,7 +190,7 @@ inference_helper = start_inference
 def inference(questions, print = False):
 
     # Change current working directory (needed to load relative paths properly)
-    os.chdir(os.path.realpath(os.path.dirname(__file__)))
+    os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
     # Process questions
     answers_list = process_questions(questions)

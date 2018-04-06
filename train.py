@@ -3,8 +3,8 @@ import os
 import argparse
 from setup.settings import hparams, preprocessing
 import math
-sys.path.append(os.path.realpath(os.path.dirname(__file__)))
-sys.path.append(os.path.realpath(os.path.dirname(__file__)) + "/nmt")
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/nmt")
 from nmt import nmt
 import tensorflow as tf
 import colorama

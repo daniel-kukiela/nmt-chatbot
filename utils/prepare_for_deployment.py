@@ -1,5 +1,5 @@
 import os
-os.chdir(os.path.realpath(os.path.dirname(os.path.dirname(__file__))))
+os.chdir(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import sys
 sys.path.insert(0, os.getcwd())
 from setup.settings import hparams, preprocessing
