@@ -1,7 +1,61 @@
 
-# Default custom summary (does nothing)
+# Custom summary for math model
 def custom_summary(data):
-    return {}
+
+    try:
+        model_in, actual_out, model_out = list(zip(*data))
+
+        correct = 0
+        total = 0
+        total_off = 0
+
+        muls = 0
+        divs = 0
+        adds = 0
+        subs = 0
+
+        for i, _ in enumerate(model_out[:-1]):
+
+            if actual_out[i] == model_out[i]:
+                correct += 1
+            total += 1
+
+            try:
+                diff = abs(float(actual_out[i].replace(" ", "")) - float(model_out[i].replace(" ", "")))
+            except:
+                diff = abs(float(actual_out[i].replace(" ", "")))
+            total_off += diff
+
+            if "+" in model_in[i]:
+                adds += diff
+            elif "*" in model_in[i]:
+                muls += diff
+            elif "/" in model_in[i]:
+                divs += diff
+            else:
+                subs += diff
+
+        evaluations = {
+            'math_total_acc': float(round(correct / total, 4)),
+            'math_tdiff':     float(round(total_off, 4)),
+            'math_muls':      float(round(muls, 4)),
+            'math_divs':      float(round(divs, 4)),
+            'math_adds':      float(round(adds, 4)),
+            'math_subs':      float(round(subs, 4)),
+        }
+
+        print("!!! Math model evaluation: Total Acc {} | TDiff: {} | Muls {} | Divs {} | Adds {} | Subs {}".format(
+                                                                                             evaluations['math_total_acc'],
+                                                                                             evaluations['math_tdiff'],
+                                                                                             evaluations['math_muls'],
+                                                                                             evaluations['math_divs'],
+                                                                                             evaluations['math_adds'],
+                                                                                             evaluations['math_subs']))
+        return evaluations
+
+    except Exception as e:
+        print('!!! Error in custom summary function: {}'.format(str(e)))
+        return {}
 
 # Example custom summary
 def example_custom_summary(data):
