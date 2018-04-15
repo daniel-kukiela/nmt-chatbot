@@ -25,24 +25,24 @@ preprocessing = {
     'samples': -1,
 
     # Vocab max size
-    'vocab_size': 15000,
+    'vocab_size': 18,
 
     # Whether to use joined (common) vocab for both source and destination
     # (should work well with BPE/WPM-like tokenization for our chatbot - english-english translation)
     'joined_vocab': True,
 
     # Whether to use BPE/WPM-like tokenization, or standard one
-    'use_bpe': True,
+    'use_bpe': False,
     
     # Whether to use:
     # - embedded detokenizer (increases number of vocab tokens, but is more accurate)
     # - external/rule-based detokenizer (based of a bunch of rules and regular expressions)
     #   doesn't increase number of tokens in vocab, but it's hard to make a rule for every case)
     # Note, that embedded detokenizer is forced to True while using BPE-like tokenizer
-    'embedded_detokenizer': True,
+    'embedded_detokenizer': False,
 
     # Test sets' max size
-    'test_size': 100,
+    'test_size': 500,
 
     # Custom decaying scheme and training duration:
     # - trains model for certain number of epochs (number of list entries)
@@ -51,7 +51,7 @@ preprocessing = {
     # - automatically sets number of steps and restarts training every epoch with changed learning rate
     # - ends training after set number of epochs
     # Set to None to disable
-    'epochs': [0.001, 0.0001, 0.00001],
+    'epochs': [0.001, 0.001, 0.0005, 0.0005, 0.00025, 0.00025, 0.0001, 0.0001, 0.00001, 0.00001],
 
 
     ## You don't normally need to change anything below (internal settings)
@@ -83,13 +83,14 @@ preprocessing = {
 
 # hparams
 hparams = {
+    'steps_per_external_eval':1000,
     'attention': 'scaled_luong',
     'num_train_steps': 10000000,
-    'num_layers': 2,
+    'num_layers': 10,
 #    'num_encoder_layers': 2,
 #    'num_decoder_layers': 2,
     'num_units': 512,
-#    'batch_size': 128,
+    'batch_size': 128,
 #    'override_loaded_hparams': True,
 #    'decay_scheme': 'luong234'
 #    'residual': True,
