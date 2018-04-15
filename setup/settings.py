@@ -117,7 +117,7 @@ hparams = {
 score = {
 
     # Either to use scoring or score responses by order only
-    'use_scoring': True,
+    'use_scoring': False,
 
     # File with blacklisted answers
     'answers_subsentence_score_file': os.path.join(package_path, 'setup/answers_subsentence_score.txt'),
