@@ -161,6 +161,11 @@ def do_inference(infer_data, infer_model, flags, hparams):
 
         return answers
 
+def apply_bpe_load_helper():
+    # Load BPE join pairs
+    if preprocessing['use_bpe']:
+        apply_bpe_load()
+
 # Fancy way to start everything on first inference() call
 def start_inference(question):
 
@@ -172,10 +177,6 @@ def start_inference(question):
     # First inference() call calls that method
     # Now we have everything running, so replace inference() with actual function call
     inference_helper = lambda question: do_inference(question, *inference_object)
-
-    # Load BPE join pairs
-    if preprocessing['use_bpe']:
-        apply_bpe_load()
 
     # Rerun inference() call
     return inference_helper(question)
@@ -283,6 +284,9 @@ if __name__ == "__main__":
     # Input file
     if sys.stdin.isatty() == False:
 
+        # load bpe
+        apply_bpe_load_helper()
+
         # Process questions
         answers_list = process_questions(sys.stdin.readlines())
 
@@ -301,6 +305,9 @@ if __name__ == "__main__":
         checkpoint = hparams['out_dir'] + str(sys.argv[1])
         hparams['ckpt'] = checkpoint
         print("Using checkpoint: {}".format(checkpoint))
+
+    # load bpe
+    apply_bpe_load_helper()
 
     # QAs
     while True:
