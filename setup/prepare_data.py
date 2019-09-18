@@ -4,6 +4,7 @@ os.chdir(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import sys
 sys.path.insert(0, os.getcwd())
 from core.tokenizer import tokenize
+import gzip
 
 
 # Prepare all files
@@ -46,6 +47,15 @@ def prepare():
         # Iterate thru files and prepare them
         for file_name, amounts in files.items():
 
+            source_file_name = '{}{}'.format(preprocessing['source_folder'], file_name)
+            if os.path.isfile(source_file_name):
+                open_function = open
+                additioan_params = {'buffering': 131072}
+            elif os.path.isfile(source_file_name + '.gz'):
+                source_file_name = source_file_name + '.gz'
+                open_function = gzip.open
+                additioan_params = {}
+
             vocab = Counter()
 
             print("File: {}{}{}".format(colorama.Fore.GREEN, file_name, colorama.Fore.RESET))
@@ -66,7 +76,7 @@ def prepare():
             with Pool(processes=preprocessing['cpu_count']) as pool:
 
                 # Count number of lines in file
-                number_of_records = min(amount, sum(1 for _ in open('{}{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072)))
+                number_of_records = min(amount, sum(1 for _ in open_function(source_file_name, 'rt', encoding='utf-8', **additioan_params)))
                 if file_name == '{}.{}'.format(hparams['train_prefix'].replace('.bpe', ''), hparams['src']).replace(preprocessing['train_folder'], '').lstrip('\\/'):
                     corpus_size = number_of_records
                     with open('{}/corpus_size'.format(preprocessing['train_folder']), 'w') as f:
@@ -76,7 +86,7 @@ def prepare():
                 progress = tqdm(ascii=True, unit=' lines', total=number_of_records)
 
                 # Open input file
-                with open('{}{}'.format(preprocessing['source_folder'], file_name), 'r', encoding='utf-8', buffering=131072) as in_file:
+                with open_function(source_file_name, 'rt', encoding='utf-8', **additioan_params) as in_file:
 
                     last_batch = False
 
