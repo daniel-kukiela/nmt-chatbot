@@ -59,27 +59,21 @@ def do_start_inference(out_dir, hparams):
         sys.exit()
 
     # Load hparams from model folder
-    hparams = nmt.create_or_load_hparams(flags.out_dir, hparams, flags.hparams_path, save_hparams=True)
+    hparams = nmt.create_or_load_hparams(flags.out_dir, hparams, flags.hparams_path, save_hparams=False)
 
     # Choose checkpoint (provided with hparams or last one)
     if not flags.ckpt:
         flags.ckpt = tf.train.latest_checkpoint(flags.out_dir)
 
     # Create model
-    if not hparams.attention:
-        model_creator = nmt.inference.nmt_model.Model
-    elif hparams.attention_architecture == "standard":
-        model_creator = nmt.inference.attention_model.AttentionModel
-    elif hparams.attention_architecture in ["gnmt", "gnmt_v2"]:
-        model_creator = nmt.inference.gnmt_model.GNMTModel
-    else:
-        raise ValueError("Unknown model architecture")
+    model_creator = nmt.inference.get_model_creator(hparams)
     infer_model = nmt.inference.model_helper.create_infer_model(model_creator, hparams, None)
+    sess, loaded_infer_model = nmt.inference.start_sess_and_load_model(infer_model, flags.ckpt)
 
-    return (infer_model, flags, hparams)
+    return (sess, infer_model, loaded_infer_model, flags, hparams)
 
 # Inference
-def do_inference(infer_data, infer_model, flags, hparams):
+def do_inference(infer_data, sess, infer_model, loaded_infer_model, flags, hparams):
 
     # Disable TF logs for a while
     # Workaround for bug: https://github.com/tensorflow/tensorflow/issues/12414
@@ -91,11 +85,8 @@ def do_inference(infer_data, infer_model, flags, hparams):
         current_stdout = sys.stdout
         sys.stdout = open(os.devnull, "w")
 
-    # Spawn new session
-    with tf.Session(graph=infer_model.graph, config=nmt.utils.get_config_proto()) as sess:
-
-        # Load model
-        loaded_infer_model = nmt.inference.model_helper.load_model(infer_model.model, flags.ckpt, sess, "infer")
+    # With existing session
+    with infer_model.graph.as_default():
 
         # Run model (translate)
         sess.run(
@@ -107,7 +98,10 @@ def do_inference(infer_data, infer_model, flags, hparams):
 
 
         # calculate number of translations to be returned
-        num_translations_per_input = max(min(hparams.num_translations_per_input, hparams.beam_width), 1)
+        if hparams.infer_mode == "greedy":
+            num_translations_per_input = 1
+        elif hparams.infer_mode == "beam_search":
+            num_translations_per_input = min(hparams.num_translations_per_input, hparams.beam_width)
 
         answers = []
         while True:
@@ -115,7 +109,7 @@ def do_inference(infer_data, infer_model, flags, hparams):
 
                 nmt_outputs, _ = loaded_infer_model.decode(sess)
 
-                if hparams.beam_width == 0:
+                if hparams.infer_mode != "beam_search":
                     nmt_outputs = nmt.inference.nmt_model.np.expand_dims(nmt_outputs, 0)
 
                 batch_size = nmt_outputs.shape[1]
@@ -126,7 +120,8 @@ def do_inference(infer_data, infer_model, flags, hparams):
                     translations = []
                     for beam_id in range(num_translations_per_input):
 
-                        if hparams.eos: tgt_eos = hparams.eos.encode("utf-8")
+                        if hparams.eos:
+                            tgt_eos = hparams.eos.encode("utf-8")
 
                         # Select a sentence
                         output = nmt_outputs[beam_id][sent_id, :].tolist()
