@@ -76,7 +76,7 @@ def prepare():
             with Pool(processes=preprocessing['cpu_count']) as pool:
 
                 # Count number of lines in file
-                number_of_records = min(amount, sum(1 for _ in open_function(source_file_name, 'rt', encoding='utf-8', **additioan_params)))
+                number_of_records = min(amount, sum(1 for _ in open_function(source_file_name, 'rt', encoding='utf-8', errors='ignore', **additioan_params)))
                 if file_name == '{}.{}'.format(hparams['train_prefix'].replace('.bpe', ''), hparams['src']).replace(preprocessing['train_folder'], '').lstrip('\\/'):
                     corpus_size = number_of_records
                     with open('{}/corpus_size'.format(preprocessing['train_folder']), 'w') as f:
@@ -86,7 +86,7 @@ def prepare():
                 progress = tqdm(ascii=True, unit=' lines', total=number_of_records)
 
                 # Open input file
-                with open_function(source_file_name, 'rt', encoding='utf-8', **additioan_params) as in_file:
+                with open_function(source_file_name, 'rt', encoding='utf-8', errors='ignore', **additioan_params) as in_file:
 
                     last_batch = False
 
@@ -423,18 +423,18 @@ def prepare():
                 # Progress bar
                 if file_name == '{}.{}'.format(hparams['train_prefix'], hparams['src']).replace(preprocessing['train_folder'], '').lstrip('\\/'):
                     if not corpus_size:
-                        with open('{}/corpus_size'.format(preprocessing['train_folder']), 'r') as f:
+                        with open('{}/corpus_size'.format(preprocessing['train_folder']), 'r', errors='ignore') as f:
                             number_of_records = corpus_size = int(f.read())
                     else:
                         number_of_records = corpus_size
                 elif file_name == '{}.{}'.format(hparams['train_prefix'], hparams['tgt']).replace(preprocessing['train_folder'], '').lstrip('\\/'):
                     number_of_records = corpus_size
                 else:
-                    number_of_records = sum(1 for _ in open('{}{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')), 'r', encoding='utf-8', buffering=131072))
+                    number_of_records = sum(1 for _ in open('{}{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')), 'r', encoding='utf-8', buffering=131072, errors='ignore'))
                 progress = tqdm(ascii=True, unit=' lines', total=number_of_records)
 
                 # Open input file
-                with open('{}{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')), 'r', encoding='utf-8', buffering=131072) as in_file:
+                with open('{}{}'.format(preprocessing['train_folder'], file_name.replace('.bpe.', '.')), 'r', encoding='utf-8', buffering=131072, errors='ignore') as in_file:
 
                     # Iterate every 10k lines
                     for rows in read_lines(in_file, 10000, ''):
